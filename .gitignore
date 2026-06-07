@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# Secrets / local config
+.env
+.env.*
+*.local
+
+# Generated collection artifacts
+output/
+
+# OS
+.DS_Store
+Thumbs.db

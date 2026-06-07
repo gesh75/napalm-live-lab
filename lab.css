@@ -1,0 +1,33 @@
+/* lab.css — supplemental tweaks for /lab page.
+ *
+ * Core styling lives inline in lab.html (GitHub-dark palette). This file
+ * loads first via <link>, so inline <style> overrides where they overlap.
+ * Use this file only for optional / experimental refinements so the page
+ * survives even if this file is empty or unreachable.
+ *
+ * Palette reference (do not deviate):
+ *   --bg-primary:#0d1117  --bg-secondary:#161b22  --bg-card:#1c2128
+ *   --bg-hover:#21262d    --border:#30363d
+ *   --text-primary:#e6edf3 --text-secondary:#8b949e --text-muted:#6e7681
+ *   --accent-blue:#58a6ff --accent-green:#3fb950 --accent-red:#f85149
+ *   --accent-orange:#d29922 --accent-purple:#bc8cff --accent-cyan:#39d2c0 --accent-pink:#f778ba
+ *   vendor: arista=#d29922  nokia=#39d2c0  frr=#bc8cff
+ */
+
+/* Smooth scrolling inside the scrollable matrix table. */
+.table-wrap { scroll-behavior: smooth; }
+
+/* Thin GitHub-dark scrollbars for the matrix + topology canvases. */
+.table-wrap::-webkit-scrollbar,
+.topo-canvas::-webkit-scrollbar { width: 10px; height: 10px; }
+.table-wrap::-webkit-scrollbar-track,
+.topo-canvas::-webkit-scrollbar-track { background: #161b22; }
+.table-wrap::-webkit-scrollbar-thumb,
+.topo-canvas::-webkit-scrollbar-thumb { background: #30363d; border-radius: 6px; }
+.table-wrap::-webkit-scrollbar-thumb:hover,
+.topo-canvas::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+/* Respect reduced-motion: kill the live-dot pulse. */
+@media (prefers-reduced-motion: reduce) {
+  .live-dot { animation: none !important; }
+}

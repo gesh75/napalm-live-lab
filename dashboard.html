@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAPALM Network Dashboard</title>
+<style>
+/* ── Reset & Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+    --bg-primary: #0d1117;
+    --bg-secondary: #161b22;
+    --bg-card: #1c2128;
+    --bg-hover: #21262d;
+    --border: #30363d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #6e7681;
+    --accent-blue: #58a6ff;
+    --accent-green: #3fb950;
+    --accent-red: #f85149;
+    --accent-orange: #d29922;
+    --accent-purple: #bc8cff;
+    --accent-cyan: #39d2c0;
+    --accent-pink: #f778ba;
+    --radius: 8px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+}
+a { color: var(--accent-blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Header ───────────────────────────────────────────────────────────────── */
+.header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.header-logo {
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.header-sub { color: var(--text-secondary); font-size: 13px; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.status-badge {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text-secondary);
+    background: var(--bg-card); padding: 4px 10px;
+    border-radius: 20px; border: 1px solid var(--border);
+}
+.status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent-green);
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* ── Layout ───────────────────────────────────────────────────────────────── */
+.layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: calc(100vh - 53px);
+}
+
+/* ── Sidebar ──────────────────────────────────────────────────────────────── */
+.sidebar {
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    padding: 16px 0;
+    overflow-y: auto;
+}
+.sidebar-section { padding: 0 16px; margin-bottom: 20px; }
+.sidebar-title {
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-muted); margin-bottom: 8px;
+    padding: 0 4px;
+}
+
+/* Site selector */
+.site-selector { display: flex; flex-direction: column; gap: 4px; }
+.site-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; border-radius: var(--radius);
+    background: transparent; border: 1px solid transparent;
+    color: var(--text-secondary); font-size: 13px;
+    cursor: pointer; transition: all 0.15s;
+}
+.site-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.site-btn.active {
+    background: rgba(88,166,255,0.1);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+}
+.site-btn .count {
+    background: var(--bg-hover); padding: 1px 8px;
+    border-radius: 10px; font-size: 11px;
+}
+
+/* Tool buttons */
+.tool-list { display: flex; flex-direction: column; gap: 3px; }
+.tool-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-radius: var(--radius);
+    background: transparent; border: none;
+    color: var(--text-secondary); font-size: 13px;
+    cursor: pointer; transition: all 0.15s;
+    text-align: left; width: 100%;
+}
+.tool-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.tool-btn.active { background: var(--bg-hover); color: var(--text-primary); font-weight: 600; }
+.tool-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; flex-shrink: 0;
+}
+.tool-label { flex: 1; }
+.tool-badge {
+    font-size: 10px; padding: 2px 6px;
+    border-radius: 10px; font-weight: 600;
+}
+
+/* Tool icon colors */
+.ti-version   { background: rgba(88,166,255,0.15); color: var(--accent-blue); }
+.ti-bgp       { background: rgba(63,185,80,0.15); color: var(--accent-green); }
+.ti-audit     { background: rgba(188,140,255,0.15); color: var(--accent-purple); }
+.ti-health    { background: rgba(248,81,73,0.15); color: var(--accent-red); }
+.ti-errors    { background: rgba(210,153,34,0.15); color: var(--accent-orange); }
+.ti-lldp      { background: rgba(57,210,192,0.15); color: var(--accent-cyan); }
+.ti-collect   { background: rgba(88,166,255,0.15); color: var(--accent-blue); }
+.ti-snapshot  { background: rgba(247,120,186,0.15); color: var(--accent-pink); }
+
+.tb-new       { background: rgba(63,185,80,0.2); color: var(--accent-green); }
+.tb-core      { background: rgba(88,166,255,0.2); color: var(--accent-blue); }
+
+/* ── Main Content ─────────────────────────────────────────────────────────── */
+.main { padding: 24px; overflow-y: auto; }
+
+/* Welcome / No selection */
+.welcome {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    min-height: 60vh; text-align: center;
+}
+.welcome-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.6; }
+.welcome h2 { font-size: 24px; margin-bottom: 8px; }
+.welcome p { color: var(--text-secondary); max-width: 420px; }
+
+/* Tool header */
+.tool-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+.tool-header h2 { font-size: 20px; display: flex; align-items: center; gap: 10px; }
+.tool-header-actions { display: flex; gap: 8px; }
+
+/* Run button */
+.btn {
+    padding: 8px 16px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; border: 1px solid var(--border);
+    transition: all 0.15s;
+}
+.btn-primary {
+    background: var(--accent-blue); color: #fff;
+    border-color: var(--accent-blue);
+}
+.btn-primary:hover { filter: brightness(1.15); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary { background: var(--bg-card); color: var(--text-primary); }
+.btn-secondary:hover { background: var(--bg-hover); }
+.btn-danger { background: var(--accent-red); color: #fff; border-color: var(--accent-red); }
+.btn-success { background: var(--accent-green); color: #fff; border-color: var(--accent-green); }
+
+/* Progress */
+.progress-bar {
+    width: 100%; height: 4px;
+    background: var(--bg-hover); border-radius: 2px;
+    overflow: hidden; margin-bottom: 16px;
+}
+.progress-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+    transition: width 0.3s ease;
+}
+.progress-text {
+    font-size: 13px; color: var(--text-secondary);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+}
+.spinner {
+    width: 14px; height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent-blue);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Cards / Tables */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+.card-title {
+    font-size: 14px; font-weight: 600;
+    margin-bottom: 12px; color: var(--text-secondary);
+    display: flex; align-items: center; gap: 8px;
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin-bottom: 16px;
+}
+.stat-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+}
+.stat-value { font-size: 28px; font-weight: 700; line-height: 1.2; }
+.stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.stat-green .stat-value { color: var(--accent-green); }
+.stat-red .stat-value { color: var(--accent-red); }
+.stat-blue .stat-value { color: var(--accent-blue); }
+.stat-orange .stat-value { color: var(--accent-orange); }
+.stat-purple .stat-value { color: var(--accent-purple); }
+.stat-cyan .stat-value { color: var(--accent-cyan); }
+
+table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px;
+}
+th {
+    text-align: left; padding: 8px 10px;
+    color: var(--text-secondary); font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+}
+tr:hover td { background: rgba(255,255,255,0.02); }
+.mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
+.badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 10px; font-size: 11px; font-weight: 600;
+}
+.badge-up { background: rgba(63,185,80,0.15); color: var(--accent-green); }
+.badge-down { background: rgba(248,81,73,0.15); color: var(--accent-red); }
+.badge-warn { background: rgba(210,153,34,0.15); color: var(--accent-orange); }
+.badge-info { background: rgba(88,166,255,0.15); color: var(--accent-blue); }
+.badge-ok { background: rgba(63,185,80,0.15); color: var(--accent-green); }
+.badge-error { background: rgba(248,81,73,0.15); color: var(--accent-red); }
+
+/* Alerts list */
+.alert-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; border-radius: var(--radius);
+    margin-bottom: 6px; font-size: 13px;
+}
+.alert-critical { background: rgba(248,81,73,0.1); border-left: 3px solid var(--accent-red); }
+.alert-warning { background: rgba(210,153,34,0.1); border-left: 3px solid var(--accent-orange); }
+.alert-info { background: rgba(88,166,255,0.1); border-left: 3px solid var(--accent-blue); }
+.alert-icon { font-size: 16px; }
+.alert-text { flex: 1; }
+.alert-host { font-weight: 600; margin-right: 6px; }
+
+/* Topology (simple ASCII-like view) */
+.topo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+}
+.topo-node {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+}
+.topo-node-title { font-weight: 600; margin-bottom: 6px; }
+.topo-link {
+    font-size: 12px; color: var(--text-secondary);
+    padding: 3px 0; display: flex; gap: 6px;
+}
+.topo-port { color: var(--accent-cyan); font-family: monospace; font-size: 11px; }
+
+/* Snapshot diff */
+.diff-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 14px; border-radius: var(--radius);
+    margin-bottom: 4px; font-size: 13px;
+}
+.diff-add { background: rgba(63,185,80,0.08); border-left: 3px solid var(--accent-green); }
+.diff-remove { background: rgba(248,81,73,0.08); border-left: 3px solid var(--accent-red); }
+.diff-change { background: rgba(210,153,34,0.08); border-left: 3px solid var(--accent-orange); }
+
+/* Snapshot controls */
+.snap-controls {
+    display: flex; gap: 12px; align-items: end;
+    margin-bottom: 16px; flex-wrap: wrap;
+}
+.snap-controls label { font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+.snap-controls select, .snap-controls input {
+    background: var(--bg-secondary); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 8px 12px; font-size: 13px;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center; padding: 40px;
+    color: var(--text-muted);
+}
+.empty-state-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────────────── -->
+<header class="header">
+    <div class="header-left">
+        <div class="header-logo">NAPALM Network Dashboard</div>
+        <div class="header-sub">v1.0 — Multi-vendor network operations</div>
+    </div>
+    <div class="header-right">
+        <div class="status-badge">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Connecting...</span>
+        </div>
+    </div>
+</header>
+
+<!-- ── Layout ─────────────────────────────────────────────────────────────── -->
+<div class="layout">
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <!-- Site selector -->
+        <div class="sidebar-section">
+            <div class="sidebar-title">Sites</div>
+            <div class="site-selector" id="siteSelector">
+                <button class="site-btn active" data-site="all" onclick="selectSite('all')">
+                    All Sites <span class="count" id="allCount">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tools -->
+        <div class="sidebar-section">
+            <div class="sidebar-title">Tools</div>
+            <div class="tool-list">
+                <button class="tool-btn" data-tool="version-audit" onclick="selectTool('version-audit')">
+                    <span class="tool-icon ti-version">⬡</span>
+                    <span class="tool-label">Version Audit</span>
+                    <span class="tool-badge tb-new">NEW</span>
+                </button>
+                <button class="tool-btn" data-tool="bgp-status" onclick="selectTool('bgp-status')">
+                    <span class="tool-icon ti-bgp">⇋</span>
+                    <span class="tool-label">BGP Status</span>
+                    <span class="tool-badge tb-core">CORE</span>
+                </button>
+                <button class="tool-btn" data-tool="netbox-audit" onclick="selectTool('netbox-audit')">
+                    <span class="tool-icon ti-audit">⊕</span>
+                    <span class="tool-label">NetBox Audit</span>
+                    <span class="tool-badge tb-core">CORE</span>
+                </button>
+                <button class="tool-btn" data-tool="env-health" onclick="selectTool('env-health')">
+                    <span class="tool-icon ti-health">♥</span>
+                    <span class="tool-label">Environment Health</span>
+                    <span class="tool-badge tb-new">NEW</span>
+                </button>
+                <button class="tool-btn" data-tool="interface-errors" onclick="selectTool('interface-errors')">
+                    <span class="tool-icon ti-errors">⚡</span>
+                    <span class="tool-label">Interface Errors</span>
+                    <span class="tool-badge tb-new">NEW</span>
+                </button>
+                <button class="tool-btn" data-tool="lldp-topology" onclick="selectTool('lldp-topology')">
+                    <span class="tool-icon ti-lldp">◎</span>
+                    <span class="tool-label">LLDP Topology</span>
+                    <span class="tool-badge tb-new">NEW</span>
+                </button>
+                <button class="tool-btn" data-tool="site-collect" onclick="selectTool('site-collect')">
+                    <span class="tool-icon ti-collect">⬇</span>
+                    <span class="tool-label">Full Collection</span>
+                    <span class="tool-badge tb-core">CORE</span>
+                </button>
+                <button class="tool-btn" data-tool="snapshot" onclick="selectTool('snapshot')">
+                    <span class="tool-icon ti-snapshot">◫</span>
+                    <span class="tool-label">Pre/Post Diff</span>
+                    <span class="tool-badge tb-new">NEW</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Jobs -->
+        <div class="sidebar-section">
+            <div class="sidebar-title">Recent Jobs</div>
+            <div id="recentJobs" style="font-size: 12px; color: var(--text-muted); padding: 0 4px;">
+                No jobs yet
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main" id="mainContent">
+        <div class="welcome" id="welcomeView">
+            <div class="welcome-icon">🔧</div>
+            <h2>NAPALM Network Dashboard</h2>
+            <p>Select a site and tool from the sidebar to get started. All operations run in the background — you can monitor progress in real time.</p>
+        </div>
+        <div id="toolView" style="display:none;"></div>
+    </main>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>
