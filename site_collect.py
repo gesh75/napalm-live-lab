@@ -46,7 +46,7 @@ def generate_report(site: str, results: dict, nb_devices: list) -> str:
     lines = [
         f"# {site.upper()} Site Collection Report",
         f"**Generated:** {ts}  ",
-        f"**SSH User:** gandalf (NAPALM)  \n",
+        f"**SSH User:** netops (NAPALM)  \n",
     ]
 
     # ── Device summary
@@ -194,7 +194,7 @@ def run_site(site: str, devices: dict):
     console.print(f"  NetBox devices: {len(nb_devices)}")
 
     # Collect via NAPALM
-    console.print(f"\n[cyan]Connecting via NAPALM (gandalf key)...[/cyan]")
+    console.print(f"\n[cyan]Connecting via NAPALM (SSH key)...[/cyan]")
     results = collect_site_parallel(devices, FULL_GETTERS, max_workers=5)
 
     # Print summary table

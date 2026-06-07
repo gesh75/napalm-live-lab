@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NAPALM Live Lab — Multivendor Network Automation Truth Engine</title>
+<meta name="description" content="A live multivendor containerlab fabric (Arista cEOS, Nokia SR Linux, FRRouting) that shows the honest truth about NAPALM's multivendor coverage — plus a secure command console running 2,361 curated operational commands.">
+<meta name="author" content="Georgi Gaydarov">
+<meta property="og:title" content="NAPALM Live Lab">
+<meta property="og:description" content="Senior network engineering — AI-native network operations tooling. A live multivendor coverage matrix and secure command console for NAPALM.">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --bg:#0d1117;
+    --card:#161b22;
+    --card-2:#1c2128;
+    --border:#30363d;
+    --text:#e6edf3;
+    --muted:#8b949e;
+    --blue:#58a6ff;
+    --cyan:#39d2c0;
+    --green:#3fb950;
+    --orange:#d29922;
+    --purple:#bc8cff;
+    --radius:14px;
+    --maxw:1140px;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji",sans-serif;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font);
+    line-height:1.65;
+    font-size:16px;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{color:var(--blue);text-decoration:none;transition:color .15s ease;}
+  a:hover{color:var(--cyan);}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  .gradient-text{
+    background:linear-gradient(100deg,var(--blue) 0%,var(--cyan) 45%,var(--purple) 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    color:transparent;
+  }
+
+  /* ===== Background glow ===== */
+  .bg-glow{
+    position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(700px 480px at 18% -8%, rgba(88,166,255,.16), transparent 60%),
+      radial-gradient(620px 460px at 92% 4%, rgba(188,140,255,.14), transparent 60%),
+      radial-gradient(700px 520px at 50% 108%, rgba(57,210,192,.10), transparent 60%);
+  }
+
+  /* ===== Nav ===== */
+  nav{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:saturate(160%) blur(12px);
+    background:rgba(13,17,23,.72);
+    border-bottom:1px solid var(--border);
+  }
+  nav .wrap{display:flex;align-items:center;justify-content:space-between;height:62px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.05rem;letter-spacing:-.01em;}
+  .brand .dot{
+    width:11px;height:11px;border-radius:50%;
+    background:linear-gradient(135deg,var(--cyan),var(--blue));
+    box-shadow:0 0 14px rgba(57,210,192,.7);
+  }
+  .nav-links{display:flex;gap:26px;align-items:center;}
+  .nav-links a{color:var(--muted);font-size:.93rem;font-weight:500;}
+  .nav-links a:hover{color:var(--text);}
+  @media(max-width:720px){.nav-links{display:none;}}
+
+  /* ===== Hero ===== */
+  header.hero{padding:96px 0 72px;position:relative;}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--cyan);
+    border:1px solid var(--border);
+    background:var(--card);
+    padding:6px 14px;border-radius:999px;margin-bottom:26px;
+  }
+  .eyebrow .pulse{
+    width:7px;height:7px;border-radius:50%;background:var(--green);
+    box-shadow:0 0 0 0 rgba(63,185,80,.7);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(63,185,80,.6);}
+    70%{box-shadow:0 0 0 9px rgba(63,185,80,0);}
+    100%{box-shadow:0 0 0 0 rgba(63,185,80,0);}
+  }
+  h1.title{
+    font-size:clamp(2.6rem,7vw,5rem);
+    line-height:1.02;
+    letter-spacing:-.03em;
+    font-weight:800;
+    margin-bottom:22px;
+  }
+  .tagline{
+    font-size:clamp(1.05rem,2.4vw,1.4rem);
+    color:var(--muted);
+    max-width:760px;
+    margin-bottom:14px;
+    font-weight:400;
+  }
+  .tagline strong{color:var(--text);font-weight:600;}
+  .subline{
+    font-size:1rem;color:var(--muted);max-width:720px;margin-bottom:38px;
+  }
+  .cta{display:flex;gap:14px;flex-wrap:wrap;}
+  .btn{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:13px 24px;border-radius:11px;font-weight:600;font-size:.96rem;
+    border:1px solid var(--border);transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{
+    background:linear-gradient(120deg,var(--blue),var(--cyan));
+    color:#06121f;border-color:transparent;
+    box-shadow:0 8px 26px rgba(57,210,192,.28);
+  }
+  .btn-primary:hover{color:#06121f;box-shadow:0 12px 34px rgba(57,210,192,.42);}
+  .btn-ghost{background:var(--card);color:var(--text);}
+  .btn-ghost:hover{border-color:var(--blue);color:var(--text);}
+
+  /* ===== Stat strip ===== */
+  .stats{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:58px;
+  }
+  .stat{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:22px 20px;text-align:center;
+  }
+  .stat .num{font-size:1.85rem;font-weight:800;letter-spacing:-.02em;}
+  .stat .lbl{font-size:.82rem;color:var(--muted);margin-top:4px;}
+  @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr);}}
+
+  /* ===== Section scaffolding ===== */
+  section{padding:74px 0;border-top:1px solid var(--border);}
+  .section-head{margin-bottom:42px;max-width:780px;}
+  .kicker{
+    font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--purple);margin-bottom:12px;
+  }
+  h2{font-size:clamp(1.7rem,3.6vw,2.5rem);font-weight:800;letter-spacing:-.02em;line-height:1.12;margin-bottom:16px;}
+  .lead{color:var(--muted);font-size:1.08rem;}
+
+  /* ===== Why prose ===== */
+  .prose p{color:var(--muted);margin-bottom:18px;max-width:860px;}
+  .prose p strong{color:var(--text);}
+  .prose code{
+    font-family:var(--mono);font-size:.86em;
+    background:var(--card-2);border:1px solid var(--border);
+    padding:2px 6px;border-radius:6px;color:var(--cyan);
+  }
+  .reality-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:34px 0 8px;}
+  .reality{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:24px;position:relative;overflow:hidden;
+  }
+  .reality::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;}
+  .reality.full::before{background:var(--green);}
+  .reality.partial::before{background:var(--orange);}
+  .reality.exec::before{background:var(--blue);}
+  .reality .badge{
+    display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:4px 10px;border-radius:999px;margin-bottom:14px;
+  }
+  .reality.full .badge{background:rgba(63,185,80,.14);color:var(--green);border:1px solid rgba(63,185,80,.35);}
+  .reality.partial .badge{background:rgba(210,153,34,.14);color:var(--orange);border:1px solid rgba(210,153,34,.35);}
+  .reality.exec .badge{background:rgba(88,166,255,.14);color:var(--blue);border:1px solid rgba(88,166,255,.35);}
+  .reality h3{font-size:1.15rem;margin-bottom:8px;letter-spacing:-.01em;}
+  .reality p{font-size:.92rem;color:var(--muted);margin:0;}
+  .reality code{font-family:var(--mono);font-size:.82em;color:var(--cyan);}
+  @media(max-width:840px){.reality-grid{grid-template-columns:1fr;}}
+
+  .callout{
+    margin-top:30px;background:var(--card-2);border:1px solid var(--border);
+    border-left:3px solid var(--purple);border-radius:12px;padding:26px 28px;
+  }
+  .callout h3{font-size:1.18rem;margin-bottom:12px;display:flex;align-items:center;gap:10px;letter-spacing:-.01em;}
+  .callout p{color:var(--muted);font-size:.96rem;margin-bottom:0;}
+  .callout code{
+    font-family:var(--mono);font-size:.85em;background:var(--bg);
+    border:1px solid var(--border);padding:2px 6px;border-radius:6px;color:var(--cyan);
+  }
+
+  /* ===== Audience pills ===== */
+  .audience{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  .aud{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:22px 24px;display:flex;gap:16px;align-items:flex-start;
+  }
+  .aud .ico{font-size:1.6rem;line-height:1;flex-shrink:0;}
+  .aud h4{font-size:1.02rem;margin-bottom:5px;letter-spacing:-.01em;}
+  .aud p{font-size:.9rem;color:var(--muted);margin:0;}
+  @media(max-width:760px){.audience{grid-template-columns:1fr;}}
+
+  /* ===== Feature cards ===== */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:26px;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+    position:relative;
+  }
+  .card:hover{transform:translateY(-4px);border-color:var(--blue);box-shadow:0 16px 40px rgba(0,0,0,.35);}
+  .card .icon{
+    font-size:1.9rem;width:52px;height:52px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--card-2);border:1px solid var(--border);margin-bottom:16px;
+  }
+  .card h3{font-size:1.16rem;margin-bottom:9px;letter-spacing:-.01em;}
+  .card p{font-size:.92rem;color:var(--muted);margin-bottom:16px;}
+  .tags{display:flex;flex-wrap:wrap;gap:7px;}
+  .tag{
+    font-family:var(--mono);font-size:.72rem;font-weight:500;
+    background:var(--card-2);border:1px solid var(--border);
+    color:var(--muted);padding:3px 9px;border-radius:999px;
+  }
+  .tag.b{color:var(--blue);border-color:rgba(88,166,255,.3);}
+  .tag.c{color:var(--cyan);border-color:rgba(57,210,192,.3);}
+  .tag.g{color:var(--green);border-color:rgba(63,185,80,.3);}
+  .tag.o{color:var(--orange);border-color:rgba(210,153,34,.3);}
+  .tag.p{color:var(--purple);border-color:rgba(188,140,255,.3);}
+  @media(max-width:920px){.cards{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:620px){.cards{grid-template-columns:1fr;}}
+
+  /* ===== Coverage table ===== */
+  .table-wrap{
+    border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;
+    background:var(--card);
+  }
+  table{width:100%;border-collapse:collapse;font-size:.94rem;}
+  thead th{
+    text-align:left;padding:16px 20px;font-size:.78rem;font-weight:700;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    background:var(--card-2);border-bottom:1px solid var(--border);
+  }
+  tbody td{padding:18px 20px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(88,166,255,.04);}
+  .vendor{font-weight:700;display:flex;align-items:center;gap:10px;}
+  .vendor .swatch{width:9px;height:9px;border-radius:50%;}
+  .pill{
+    display:inline-block;font-size:.74rem;font-weight:700;padding:4px 11px;border-radius:999px;
+    letter-spacing:.02em;
+  }
+  .pill.full{background:rgba(63,185,80,.14);color:var(--green);border:1px solid rgba(63,185,80,.35);}
+  .pill.partial{background:rgba(210,153,34,.14);color:var(--orange);border:1px solid rgba(210,153,34,.35);}
+  .pill.exec{background:rgba(88,166,255,.14);color:var(--blue);border:1px solid rgba(88,166,255,.35);}
+  td .meth{font-family:var(--mono);font-size:.82rem;color:var(--cyan);}
+  td .note{color:var(--muted);font-size:.86rem;}
+  @media(max-width:680px){
+    table{font-size:.84rem;}
+    thead th,tbody td{padding:12px 12px;}
+    .hide-sm{display:none;}
+  }
+
+  /* ===== Pitch band ===== */
+  .pitch{
+    background:linear-gradient(135deg,rgba(88,166,255,.07),rgba(188,140,255,.07));
+    border:1px solid var(--border);border-radius:18px;padding:44px 40px;
+  }
+  .pitch p{font-size:1.12rem;color:var(--text);max-width:880px;line-height:1.7;}
+  .pitch code{font-family:var(--mono);font-size:.86em;color:var(--cyan);}
+  @media(max-width:640px){.pitch{padding:30px 22px;}.pitch p{font-size:1rem;}}
+
+  /* ===== Footer ===== */
+  footer{border-top:1px solid var(--border);padding:54px 0 64px;}
+  .foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:28px;align-items:flex-start;}
+  .foot .who{max-width:420px;}
+  .foot .who .name{font-size:1.15rem;font-weight:700;margin-bottom:6px;}
+  .foot .who p{color:var(--muted);font-size:.92rem;}
+  .foot-links{display:flex;flex-direction:column;gap:10px;}
+  .foot-links a{display:inline-flex;align-items:center;gap:9px;color:var(--muted);font-weight:500;font-size:.95rem;}
+  .foot-links a:hover{color:var(--cyan);}
+  .copyright{margin-top:38px;padding-top:24px;border-top:1px solid var(--border);color:var(--muted);font-size:.85rem;}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span>NAPALM&nbsp;Live&nbsp;Lab</div>
+    <div class="nav-links">
+      <a href="#why">Why it exists</a>
+      <a href="#audience">Who it's for</a>
+      <a href="#features">Features</a>
+      <a href="#coverage">Coverage matrix</a>
+      <a href="https://github.com/gesh75/napalm-live-lab">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="pulse"></span>Live multivendor containerlab fabric</span>
+    <h1 class="title"><span class="gradient-text">NAPALM Live Lab</span></h1>
+    <p class="tagline"><strong>Senior network engineering — AI-native network operations tooling.</strong></p>
+    <p class="subline">A Flask dashboard that runs a live multivendor CLOS-EVPN fabric — Arista cEOS, Nokia SR Linux, and FRRouting — and shows the honest truth about NAPALM's multivendor promise, node by node and getter by getter. Plus a secure Command Console running 2,361 curated operational commands against real lab gear.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="https://github.com/gesh75/napalm-live-lab">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+        View on GitHub
+      </a>
+      <a class="btn btn-ghost" href="/lab">
+        Live matrix → <code style="font-family:var(--mono);font-size:.85em;color:var(--cyan)">/lab</code>
+      </a>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="num gradient-text">19</div><div class="lbl">multivendor nodes</div></div>
+      <div class="stat"><div class="num gradient-text">2,361</div><div class="lbl">curated commands</div></div>
+      <div class="stat"><div class="num gradient-text">3</div><div class="lbl">vendor stacks</div></div>
+      <div class="stat"><div class="num gradient-text">76</div><div class="lbl">hermetic tests</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ WHY ============ -->
+<section id="why">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Why this exists</div>
+      <h2>NAPALM promises one API for every vendor.<br>This lab shows where that promise frays.</h2>
+    </div>
+    <div class="prose">
+      <p>NAPALM's pitch is a single Python API that talks to any vendor — call <code>get_bgp_neighbors()</code> and you get the same normalized data structure whether the box runs Arista EOS, Cisco IOS-XR, or Juniper Junos. It's a genuinely good abstraction, and for the vendors with first-class drivers it largely delivers. But the moment you build a real multivendor fabric, the promise frays in ways the marketing never mentions — and the gaps are exactly where you find out the hard way, usually mid-automation, against production.</p>
+      <p>This lab makes those gaps <strong>visible and reproducible</strong> instead of surprising. It runs a live multivendor CLOS-EVPN fabric (3 spine + 6 leaf, mixing Arista cEOS, Nokia SR Linux, and FRRouting) plus a 10-router 3-Tier FRR network, and shows you — node by node, getter by getter — what NAPALM actually returns versus what it claims to.</p>
+
+      <div class="reality-grid">
+        <div class="reality full">
+          <span class="badge">First-class</span>
+          <h3>cEOS — Arista</h3>
+          <p>The <code>eos</code> driver ships in core NAPALM and talks eAPI over HTTPS. The standard getters work. This is what "NAPALM works" looks like.</p>
+        </div>
+        <div class="reality partial">
+          <span class="badge">Community</span>
+          <h3>SR Linux — Nokia</h3>
+          <p>No core driver — coverage comes from the separate <code>napalm-srl</code> package over JSON-RPC. Real, but a different package on a different cadence, with coverage not 1:1 with EOS. Labeled as community-sourced, not pretended equal.</p>
+        </div>
+        <div class="reality exec">
+          <span class="badge">No driver</span>
+          <h3>FRR — FRRouting</h3>
+          <p>No NAPALM driver exists. The lab doesn't fake one — FRR is collected via <code>docker exec … vtysh -c "&lt;cmd&gt; json"</code>, mapped into NAPALM-shaped dicts and tagged <code>method: exec</code>, <code>napalm_supported: false</code>. You see the seam.</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <h3>🍎 The macOS-can't-route-to-containers problem — solved by a sidecar</h3>
+        <p>On Docker Desktop for Mac, the host has no route to container management IPs — you can't open an eAPI/JSON-RPC session from your laptop to <code>172.20.20.x</code> the way native Linux Docker allows. NAPALM needs that L3 reachability, so on a Mac it simply can't connect. The fix is a <strong>sidecar pattern</strong>: a <code>napalm-runner</code> container attached to the lab's management networks runs the real NAPALM drivers from <em>inside</em> the fabric, and the host dispatches collection to it over <code>docker exec</code> (argv list, never a shell). Because every collection path — runner for eos/srl, vtysh for FRR — is <code>docker exec</code>-based, the exact same code runs identically on macOS and Linux. No VPN, no <code>route add</code>, no host-networking hacks, no "works on my Linux box" caveat.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ AUDIENCE ============ -->
+<section id="audience">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Who it's for</div>
+      <h2>Built for engineers who need the truth before they commit code.</h2>
+    </div>
+    <div class="audience">
+      <div class="aud">
+        <span class="ico">📚</span>
+        <div>
+          <h4>Network engineers learning NAPALM</h4>
+          <p>Run real getters against real (containerized) multivendor devices instead of reading driver docs and guessing what the output looks like.</p>
+        </div>
+      </div>
+      <div class="aud">
+        <span class="ico">🧭</span>
+        <div>
+          <h4>Architects evaluating NAPALM's coverage</h4>
+          <p>Decide whether NAPALM can underpin an automation platform across an Arista/Nokia/FRR estate — with the coverage matrix <em>before</em> writing thousands of lines against an abstraction that's thinner than advertised on half the fleet.</p>
+        </div>
+      </div>
+      <div class="aud">
+        <span class="ico">🛠️</span>
+        <div>
+          <h4>Automation developers doing lab-driven dev</h4>
+          <p>A reproducible, disposable fabric to write and test collection/audit code against — known topology, known BGP/EVPN state, zero risk to production.</p>
+        </div>
+      </div>
+      <div class="aud">
+        <span class="ico">🎯</span>
+        <div>
+          <h4>Job seekers building a portfolio</h4>
+          <p>A demonstrable running artifact: a live multivendor fabric, a real NAPALM coverage matrix, and a security-conscious command console — concrete evidence of containerlab fluency, not a slide deck.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">What you get</div>
+      <h2>Honest engineering, end to end.</h2>
+      <p class="lead">Every benefit below is computed from real collection against a live fabric — no marketing-grade "supports all vendors."</p>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <div class="icon">🧮</div>
+        <h3>Honest coverage matrix</h3>
+        <p>Per-node, per-getter pass/fail computed from real collection — <code>napalm_native</code> vs <code>exec_fallback</code> vs unreachable, broken out by driver. You see exactly where the abstraction holds and where it doesn't.</p>
+        <div class="tags"><span class="tag g">napalm_native</span><span class="tag b">exec_fallback</span><span class="tag o">per-getter</span></div>
+      </div>
+      <div class="card">
+        <div class="icon">⌨️</div>
+        <h3>Command Console — 2,361 commands</h3>
+        <p>A curated catalog of 2,361 single-line multivendor commands, executed live against lab nodes with the right CLI wrapper per vendor: <code>Cli</code> for cEOS, <code>vtysh</code> for FRR, <code>sr_cli</code> for SR Linux.</p>
+        <div class="tags"><span class="tag b">Cli</span><span class="tag c">sr_cli</span><span class="tag g">vtysh</span><span class="tag p">2,361 cmds</span></div>
+      </div>
+      <div class="card">
+        <div class="icon">🌐</div>
+        <h3>Multivendor topology</h3>
+        <p>Arista cEOS, Nokia SR Linux, and FRRouting in one CLOS-EVPN fabric plus a 10-router 3-Tier network. True multivendor, not single-vendor cosplay — the mix is where tooling actually breaks.</p>
+        <div class="tags"><span class="tag b">cEOS</span><span class="tag c">SR Linux</span><span class="tag g">FRR</span><span class="tag o">CLOS-EVPN</span></div>
+      </div>
+      <div class="card">
+        <div class="icon">🚀</div>
+        <h3>Real NAPALM via sidecar</h3>
+        <p>A <code>napalm-runner</code> container runs the real drivers from inside the fabric, dispatched over <code>docker exec</code>. Sidesteps the Docker-Desktop routing wall — identical behavior on macOS and Linux.</p>
+        <div class="tags"><span class="tag b">docker exec</span><span class="tag c">runner sidecar</span><span class="tag p">mac = linux</span></div>
+      </div>
+      <div class="card">
+        <div class="icon">🔒</div>
+        <h3>Secure read-only console</h3>
+        <p>Hostnames validated against a fabric allowlist; commands run as an argv list (no shell, no injection); a read-only guard permits only <code>show</code>/<code>display</code>/<code>get</code>/<code>ping</code>-class verbs; newlines and control chars rejected.</p>
+        <div class="tags"><span class="tag g">allowlist</span><span class="tag b">argv-only</span><span class="tag o">read-only guard</span></div>
+      </div>
+      <div class="card">
+        <div class="icon">🧪</div>
+        <h3>76 hermetic tests</h3>
+        <p>A fixed containerlab topology with known state means repeatable results run-to-run. 76 hermetic pytest tests cover the collection backend, the security guard, and the catalog loader.</p>
+        <div class="tags"><span class="tag p">pytest</span><span class="tag c">hermetic</span><span class="tag g">all passing</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COVERAGE TABLE ============ -->
+<section id="coverage">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">The coverage matrix</div>
+      <h2>Three vendors. Three tiers of truth.</h2>
+      <p class="lead">No papered-over seams. Each vendor is collected the way it actually has to be, and labeled honestly in the UI.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Vendor / NOS</th>
+            <th>NAPALM tier</th>
+            <th class="hide-sm">Transport / method</th>
+            <th>What you get</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="vendor"><span class="swatch" style="background:var(--green)"></span>Arista cEOS</span></td>
+            <td><span class="pill full">Full</span></td>
+            <td class="hide-sm"><span class="meth">eos driver · eAPI / HTTPS</span></td>
+            <td class="note">Core NAPALM driver. Standard getters work. Falls back to <code style="font-family:var(--mono);color:var(--cyan)">Cli -c "show version | json"</code> if eAPI is down.</td>
+          </tr>
+          <tr>
+            <td><span class="vendor"><span class="swatch" style="background:var(--orange)"></span>Nokia SR Linux</span></td>
+            <td><span class="pill partial">Partial</span></td>
+            <td class="hide-sm"><span class="meth">napalm-srl · JSON-RPC</span></td>
+            <td class="note">Community package, separate maintenance cadence. Getter coverage not 1:1 with EOS. Labeled community-sourced — not pretended equal.</td>
+          </tr>
+          <tr>
+            <td><span class="vendor"><span class="swatch" style="background:var(--blue)"></span>FRRouting</span></td>
+            <td><span class="pill exec">Exec fallback</span></td>
+            <td class="hide-sm"><span class="meth">vtysh -c "… json"</span></td>
+            <td class="note">No NAPALM driver. Collected via <code style="font-family:var(--mono);color:var(--cyan)">vtysh</code>, mapped into NAPALM-shaped dicts. Tagged <code style="font-family:var(--mono);color:var(--cyan)">napalm_supported:false</code>; LLDP / environment marked unsupported with reason.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PITCH ============ -->
+<section id="pitch">
+  <div class="wrap">
+    <div class="pitch">
+      <div class="kicker">The elevator pitch</div>
+      <p>NAPALM Live Lab is a Flask dashboard that runs a live, multivendor containerlab fabric — Arista cEOS, Nokia SR Linux, and FRRouting across a 9-node CLOS-EVPN spine/leaf plus a 10-router 3-Tier network — and shows you the truth about NAPALM's multivendor promise: full coverage on cEOS, partial community coverage on SR Linux, and no driver at all on FRR (collected honestly via <code>vtysh</code> and labeled as such). Real NAPALM runs inside a sidecar container so the whole thing behaves identically on a macOS laptop and on Linux, with no host-to-container routing hacks. On top of the live coverage matrix it adds a Command Console that runs 2,000+ curated multivendor operational commands behind a read-only, allowlist-guarded, shell-injection-proof execution layer — so you can learn NAPALM, evaluate its real multivendor coverage, and develop lab-driven automation against true multivendor gear without a single piece of physical hardware.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div class="who">
+        <div class="name gradient-text">Georgi Gaydarov</div>
+        <p>Senior Network Engineering Leader — multivendor automation, containerlab, and AI-native network operations tooling. Built to be reproducible, public-safe, and honest about what works.</p>
+      </div>
+      <div class="foot-links">
+        <a href="https://github.com/gesh75/napalm-live-lab">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          github.com/gesh75
+        </a>
+        <a href="https://linkedin.com/in/gesh75">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.63 0H2.37A2.37 2.37 0 000 2.37v11.26A2.37 2.37 0 002.37 16h11.26A2.37 2.37 0 0016 13.63V2.37A2.37 2.37 0 0013.63 0zM4.94 13.13H2.86V6.41h2.08v6.72zM3.9 5.5a1.21 1.21 0 110-2.42 1.21 1.21 0 010 2.42zm9.23 7.63h-2.08V9.86c0-.78-.01-1.78-1.08-1.78s-1.25.85-1.25 1.72v3.33H6.64V6.41h2v.92h.03c.28-.53.96-1.08 1.97-1.08 2.11 0 2.5 1.39 2.5 3.19v3.69z"/></svg>
+          linkedin.com/in/gesh75
+        </a>
+        <a href="/lab">Live coverage matrix → /lab</a>
+      </div>
+    </div>
+    <div class="copyright">
+      © <span id="yr"></span> Georgi Gaydarov · NAPALM Live Lab. Built with containerlab, NAPALM, and Flask. Public-safe: the 2,361-command catalog ships without its private source corpus, and the repo carries zero secrets.
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+  // Subtle nav active-state on scroll
+  const links = [...document.querySelectorAll('.nav-links a[href^="#"]')];
+  const map = links.map(a => ({a, sec: document.querySelector(a.getAttribute('href'))})).filter(x => x.sec);
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        map.forEach(({a, sec}) => a.style.color = (sec === e.target) ? 'var(--text)' : '');
+      }
+    });
+  }, {rootMargin: '-45% 0px -50% 0px'});
+  map.forEach(({sec}) => obs.observe(sec));
+</script>
+</body>
+</html>

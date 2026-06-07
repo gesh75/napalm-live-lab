@@ -463,6 +463,274 @@
     return seen.length ? seen : ["node"];
   }
 
+  // ---- Command Console -----------------------------------------------------
+  const CC = { catalog: null, nodes: [], vendor: "curated", search: "", mode: "cli", maxRows: 350 };
+
+  /** POST helper — returns parsed JSON even on non-2xx (API returns structured errors). */
+  async function postJSON(url, body) {
+    const res = await fetch(API + url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+    });
+    try { return await res.json(); } catch (e) { return { error: "HTTP " + res.status }; }
+  }
+
+  async function initConsole() {
+    const out = document.getElementById("ccOutput");
+    try {
+      const [cat, nodesResp] = await Promise.all([
+        getJSON("/api/lab/commands"),
+        getJSON("/api/lab/console/nodes"),
+      ]);
+      CC.catalog = cat || {};
+      CC.nodes = Array.isArray(nodesResp && nodesResp.nodes) ? nodesResp.nodes : [];
+    } catch (err) {
+      if (out) out.textContent = "Command catalog unavailable: " + (err && err.message ? err.message : err);
+      return;
+    }
+    populateNodes();
+    buildVendorChips();
+    renderCommandList();
+    setCatStat();
+    wireConsole();
+  }
+
+  function setCatStat() {
+    const s = (CC.catalog && CC.catalog.stats) || {};
+    const node = document.getElementById("ccCatStat");
+    if (!node) return;
+    const pol = (CC.catalog && CC.catalog.policy) || {};
+    node.textContent = (s.total != null ? s.total.toLocaleString() : "?") +
+      " commands · " + (s.runnable != null ? s.runnable.toLocaleString() : "?") + " runnable here" +
+      (pol.write_mode_allowed === false ? " · read-only deployment" : "");
+  }
+
+  function populateNodes() {
+    const sel = document.getElementById("ccNode");
+    if (!sel) return;
+    sel.innerHTML = "";
+    for (const n of CC.nodes) {
+      const o = document.createElement("option");
+      o.value = n.hostname;
+      o.textContent = n.hostname + " (" + (n.wrapper || n.driver) + ")";
+      sel.appendChild(o);
+    }
+    updateTargetMeta();
+  }
+
+  function updateTargetMeta() {
+    const sel = document.getElementById("ccNode");
+    const meta = document.getElementById("ccTargetMeta");
+    if (!sel || !meta) return;
+    const n = CC.nodes.find(function (x) { return x.hostname === sel.value; });
+    meta.textContent = n ? (n.vendor + " · " + n.driver + " · " + n.fabric + " · exec " + n.wrapper) : "—";
+  }
+
+  /** Vendor filter chips: Quick (curated) · NAPALM · then library vendors. */
+  function buildVendorChips() {
+    const box = document.getElementById("ccVendors");
+    if (!box) return;
+    box.innerHTML = "";
+    const stats = (CC.catalog && CC.catalog.stats) || {};
+    const byVendor = stats.by_vendor || {};
+    const curatedCount = stats.curated || 0;
+    const getters = (CC.catalog && CC.catalog.napalm_getters) || [];
+
+    const chips = [
+      { key: "curated", label: "★ Quick", count: curatedCount },
+      { key: "napalm", label: "NAPALM", count: getters.length },
+    ];
+    Object.keys(byVendor).sort().forEach(function (v) {
+      chips.push({ key: "vendor:" + v, label: v, count: byVendor[v] });
+    });
+
+    for (const c of chips) {
+      const btn = el("button", {
+        class: "cc-vchip" + (CC.vendor === c.key ? " active" : ""),
+        type: "button",
+        "data-key": c.key,
+      }, [c.label, el("span", { class: "cnt" }, String(c.count))]);
+      btn.addEventListener("click", function () {
+        CC.vendor = c.key;
+        document.querySelectorAll(".cc-vchip").forEach(function (b) {
+          b.classList.toggle("active", b.getAttribute("data-key") === c.key);
+        });
+        renderCommandList();
+      });
+      box.appendChild(btn);
+    }
+  }
+
+  /** Render the command list for the active vendor + search filter. */
+  function renderCommandList() {
+    const list = document.getElementById("ccCmdList");
+    if (!list) return;
+    list.innerHTML = "";
+    const q = (CC.search || "").trim().toLowerCase();
+
+    if (CC.vendor === "curated") return renderCurated(list, q);
+    if (CC.vendor === "napalm") return renderGetters(list, q);
+
+    const vendor = CC.vendor.replace(/^vendor:/, "");
+    const lib = (CC.catalog && CC.catalog.library) || [];
+    const items = [];
+    for (const c of lib) {
+      if (c.vendor !== vendor) continue;
+      if (q && !(c.cmd.toLowerCase().indexOf(q) !== -1 ||
+                 (c.title || "").toLowerCase().indexOf(q) !== -1 ||
+                 (c.cat || "").toLowerCase().indexOf(q) !== -1)) continue;
+      items.push(c);
+      if (items.length > CC.maxRows) break;
+    }
+    if (!items.length) { list.appendChild(emptyMsg("No commands match.")); return; }
+    for (const c of items) list.appendChild(cmdItem(c.cmd, c.cat + " · " + (c.desc || c.title || ""), c.runnable_on && c.runnable_on.length, "cli", c.runnable_on));
+    if (items.length > CC.maxRows) list.appendChild(emptyMsg("…refine your search to see more."));
+  }
+
+  function renderCurated(list, q) {
+    const curated = (CC.catalog && CC.catalog.curated) || {};
+    let any = false;
+    for (const vk of Object.keys(curated)) {
+      const grp = curated[vk];
+      const matching = (grp.commands || []).filter(function (c) {
+        return !q || c.cmd.toLowerCase().indexOf(q) !== -1 || (c.desc || "").toLowerCase().indexOf(q) !== -1;
+      });
+      if (!matching.length) continue;
+      any = true;
+      list.appendChild(el("div", { class: "cc-group-label" }, grp.label + " · " + grp.wrapper));
+      for (const c of matching) list.appendChild(cmdItem(c.cmd, c.cat + " · " + c.desc, true, "cli", [vk]));
+    }
+    if (!any) list.appendChild(emptyMsg("No quick commands match."));
+  }
+
+  function renderGetters(list, q) {
+    const getters = (CC.catalog && CC.catalog.napalm_getters) || [];
+    const matching = getters.filter(function (g) {
+      return !q || g.name.toLowerCase().indexOf(q) !== -1 || (g.desc || "").toLowerCase().indexOf(q) !== -1;
+    });
+    if (!matching.length) { list.appendChild(emptyMsg("No getters match.")); return; }
+    list.appendChild(el("div", { class: "cc-group-label" }, "NAPALM getters · structured JSON"));
+    for (const g of matching) list.appendChild(cmdItem(g.name, g.desc, true, "getter", null));
+  }
+
+  /** One clickable command row. runnable=true shows a green "run" tag. */
+  function cmdItem(cmd, meta, runnable, mode, runnableOn) {
+    const item = el("button", { class: "cc-cmd-item", type: "button" }, [
+      runnable ? el("span", { class: "cc-run-tag" }, mode === "getter" ? "getter" : "run") : null,
+      el("span", { class: "cc-cmd-txt", text: cmd }),
+      el("span", { class: "cc-cmd-meta", text: meta || "" }),
+    ]);
+    item.addEventListener("click", function () { selectCommand(cmd, mode, runnableOn); });
+    return item;
+  }
+
+  function emptyMsg(text) { return el("div", { class: "cc-empty", text: text }); }
+
+  /** Load a command into the input, set mode, and auto-pick a capable node. */
+  function selectCommand(cmd, mode, runnableOn) {
+    CC.mode = mode || "cli";
+    const input = document.getElementById("ccCmd");
+    if (input) input.value = cmd;
+    autoPickNode(runnableOn);
+    if (input) input.focus();
+  }
+
+  /** Choose a target node that can run this command, if the current one can't. */
+  function autoPickNode(runnableOn) {
+    const sel = document.getElementById("ccNode");
+    if (!sel || !runnableOn || !runnableOn.length) { updateTargetMeta(); return; }
+    // runnableOn holds lab-vendor keys: arista|frr|nokia. Map to a node by driver.
+    const driverFor = { arista: "eos", frr: "frr", nokia: "srl" };
+    const wantDrivers = runnableOn.map(function (k) { return driverFor[k] || k; });
+    const current = CC.nodes.find(function (n) { return n.hostname === sel.value; });
+    if (current && wantDrivers.indexOf(current.driver) !== -1) { updateTargetMeta(); return; }
+    const pick = CC.nodes.find(function (n) { return wantDrivers.indexOf(n.driver) !== -1; });
+    if (pick) sel.value = pick.hostname;
+    updateTargetMeta();
+  }
+
+  async function runConsole() {
+    const sel = document.getElementById("ccNode");
+    const input = document.getElementById("ccCmd");
+    const out = document.getElementById("ccOutput");
+    const runBtn = document.getElementById("ccRun");
+    const writeBox = document.getElementById("ccWrite");
+    if (!sel || !input || !out) return;
+    const hostname = sel.value;
+    const command = (input.value || "").trim();
+    if (!hostname || !command) { out.textContent = "› choose a node and enter a command."; return; }
+
+    if (runBtn) { runBtn.disabled = true; runBtn.textContent = "Running…"; }
+    out.textContent = "";
+    out.appendChild(el("span", { class: "cc-echo" }, hostname + "› " + command));
+    out.appendChild(document.createTextNode("\n"));
+
+    let res;
+    try {
+      if (CC.mode === "getter") {
+        res = await postJSON("/api/lab/getter", { hostname: hostname, getter: command });
+      } else {
+        res = await postJSON("/api/lab/run", {
+          hostname: hostname, command: command, allow_write: !!(writeBox && writeBox.checked),
+        });
+      }
+    } catch (err) {
+      res = { error: (err && err.message) || "request failed" };
+    } finally {
+      if (runBtn) { runBtn.disabled = false; runBtn.textContent = "Run ▸"; }
+    }
+    renderResult(out, res);
+  }
+
+  /** Render a run/getter result into the output pane (textContent only — XSS-safe). */
+  function renderResult(out, res) {
+    res = res || {};
+    const status = el("span", null, null);
+    if (res.blocked) {
+      status.className = "cc-warnline";
+      status.textContent = "⚠ blocked · " + (res.error || "not a read-only command");
+    } else if (res.ok) {
+      status.className = "cc-ok";
+      status.textContent = "✓ ok · " + txt(res.wrapper, "") + (res.took_ms != null ? " · " + res.took_ms + "ms" : "");
+    } else {
+      status.className = "cc-err";
+      status.textContent = "✗ " + (res.error || (res.reachable === false ? "node unreachable" : "failed")) +
+        (res.took_ms ? " · " + res.took_ms + "ms" : "");
+    }
+    out.appendChild(status);
+    out.appendChild(document.createTextNode("\n\n"));
+    const bodyText = res.output != null && res.output !== "" ? String(res.output)
+      : (res.blocked ? "(nothing executed)" : (res.ok ? "(no output)" : ""));
+    if (bodyText) out.appendChild(document.createTextNode(bodyText));
+    out.scrollTop = 0;
+  }
+
+  function wireConsole() {
+    const runBtn = document.getElementById("ccRun");
+    const input = document.getElementById("ccCmd");
+    const search = document.getElementById("ccSearch");
+    const sel = document.getElementById("ccNode");
+    const clear = document.getElementById("ccClear");
+    const writeBox = document.getElementById("ccWrite");
+    const writeLbl = document.getElementById("ccWriteLbl");
+
+    if (runBtn) runBtn.addEventListener("click", runConsole);
+    if (input) input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { CC.mode = "cli"; runConsole(); }
+    });
+    if (input) input.addEventListener("input", function () { CC.mode = "cli"; });
+    if (search) search.addEventListener("input", function () { CC.search = search.value; renderCommandList(); });
+    if (sel) sel.addEventListener("change", updateTargetMeta);
+    if (clear) clear.addEventListener("click", function () {
+      const out = document.getElementById("ccOutput");
+      if (out) out.textContent = "› cleared.";
+    });
+    if (writeBox && writeLbl) writeBox.addEventListener("change", function () {
+      writeLbl.classList.toggle("warn", writeBox.checked);
+    });
+  }
+
   // ---- Orchestration -------------------------------------------------------
   /** Render everything for the active fabric (matrix + relevant topologies). */
   function renderAll() {
@@ -528,6 +796,9 @@
 
     // Initial paint.
     setActiveFabric(initial);
+
+    // Command Console (independent of fabric toggles; loads its own catalog).
+    initConsole();
   }
 
   if (document.readyState === "loading") {

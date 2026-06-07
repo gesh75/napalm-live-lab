@@ -3,7 +3,7 @@
 Network Audit — NAPALM version
 Replaces: 04_Scripts_Tools/Analysis/dc1_network_audit.py
 
-Connects to all devices in a site via NAPALM (gandalf key),
+Connects to all devices in a site via NAPALM (SSH key),
 fetches live IP interfaces, compares against NetBox active prefixes,
 and writes a markdown report.
 
@@ -41,7 +41,7 @@ def generate_report(site: str, results: dict, nb_prefixes: list,
     lines = [
         f"# {site.upper()} Network Audit — Live vs NetBox",
         f"**Generated:** {ts}  ",
-        f"**SSH User:** gandalf (NAPALM)  ",
+        f"**SSH User:** netops (NAPALM)  ",
         f"**Site:** {site.upper()}\n",
     ]
 

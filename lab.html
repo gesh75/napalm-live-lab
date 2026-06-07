@@ -208,10 +208,76 @@
     background:var(--bg-secondary); border:1px solid var(--border); border-radius:5px; padding:1px 6px; color:var(--text-secondary);
   }
 
+  /* ---------- Command Console ---------- */
+  .cc-sub { font-size:12px; font-weight:500; color:var(--text-muted); margin-left:8px; }
+  .cc-grid { display:grid; gap:18px; grid-template-columns:minmax(300px,420px) 1fr; align-items:start; }
+  .cc-library, .cc-console {
+    background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .cc-lib-head { padding:12px; border-bottom:1px solid var(--border); }
+  .cc-input {
+    width:100%; padding:8px 11px; border:1px solid var(--border); border-radius:6px;
+    background:var(--bg-primary); color:var(--text-primary); font-size:13px; font-family:inherit;
+    outline:none; transition:border-color .12s;
+  }
+  .cc-input:focus { border-color:var(--accent-blue); }
+  .cc-input.cc-cmd { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:13px; }
+  .cc-vendors { display:flex; flex-wrap:wrap; gap:6px; padding:10px 12px; border-bottom:1px solid var(--border); }
+  .cc-vchip {
+    appearance:none; cursor:pointer; padding:4px 11px; border-radius:999px;
+    border:1px solid var(--border); background:var(--bg-secondary); color:var(--text-secondary);
+    font-size:11px; font-weight:700; font-family:inherit; transition:all .12s;
+  }
+  .cc-vchip:hover { color:var(--text-primary); border-color:var(--accent-blue); }
+  .cc-vchip.active { background:var(--accent-blue); color:#0d1117; border-color:var(--accent-blue); }
+  .cc-vchip .cnt { opacity:.7; font-weight:600; margin-left:4px; }
+  .cc-cmdlist { max-height:440px; overflow-y:auto; padding:6px; }
+  .cc-cmd-item {
+    display:block; width:100%; text-align:left; cursor:pointer;
+    padding:8px 10px; border:1px solid transparent; border-radius:6px; background:transparent;
+    color:var(--text-primary); font-family:inherit; font-size:13px;
+  }
+  .cc-cmd-item:hover { background:var(--bg-hover); border-color:var(--border); }
+  .cc-cmd-item .cc-cmd-txt { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px; color:var(--accent-cyan); }
+  .cc-cmd-item .cc-cmd-meta { display:block; margin-top:2px; font-size:11px; color:var(--text-muted); }
+  .cc-cmd-item .cc-run-tag { float:right; font-size:10px; font-weight:700; color:var(--accent-green); border:1px solid rgba(63,185,80,.35); background:rgba(63,185,80,.1); border-radius:4px; padding:0 5px; }
+  .cc-group-label { padding:9px 10px 4px; font-size:10px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; color:var(--text-muted); }
+  .cc-empty { padding:24px 12px; text-align:center; color:var(--text-muted); font-size:12px; font-style:italic; }
+
+  .cc-run-row { display:flex; gap:8px; padding:12px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .cc-select {
+    padding:8px 10px; border:1px solid var(--border); border-radius:6px;
+    background:var(--bg-primary); color:var(--text-primary); font-size:13px; font-family:inherit;
+    min-width:150px; cursor:pointer;
+  }
+  .cc-run-row .cc-cmd { flex:1 1 200px; }
+  .btn.cc-run { background:var(--accent-blue); color:#0d1117; border-color:var(--accent-blue); white-space:nowrap; }
+  .btn.cc-run:hover { background:#79b8ff; }
+  .btn.cc-run:disabled { opacity:.5; cursor:not-allowed; }
+  .cc-opts { display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:8px 12px; border-bottom:1px solid var(--border); font-size:12px; color:var(--text-secondary); }
+  .cc-write { display:inline-flex; align-items:center; gap:6px; cursor:pointer; user-select:none; }
+  .cc-write input { accent-color:var(--accent-orange); width:14px; height:14px; cursor:pointer; }
+  .cc-write.warn { color:var(--accent-orange); }
+  .cc-target-meta { font-family:ui-monospace,Menlo,monospace; color:var(--text-muted); }
+  .cc-clear { appearance:none; cursor:pointer; background:transparent; border:none; color:var(--text-muted); font-size:12px; font-family:inherit; text-decoration:underline; }
+  .cc-clear:hover { color:var(--text-secondary); }
+  .cc-output {
+    margin:0; padding:14px 16px; min-height:220px; max-height:480px; overflow:auto;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12.5px; line-height:1.55;
+    color:var(--text-secondary); white-space:pre-wrap; word-break:break-word; background:var(--bg-primary);
+  }
+  .cc-output .cc-ok { color:var(--accent-green); }
+  .cc-output .cc-err { color:var(--accent-red); }
+  .cc-output .cc-warnline { color:var(--accent-orange); }
+  .cc-output .cc-echo { color:var(--accent-blue); font-weight:700; }
+  .cc-output .cc-dim { color:var(--text-muted); }
+
   /* ---------- Responsive ---------- */
   @media (max-width:1000px) {
     .stat-bar { grid-template-columns:repeat(2,1fr); }
     .topo-grid { grid-template-columns:1fr; }
+    .cc-grid { grid-template-columns:1fr; }
   }
   @media (max-width:560px) {
     .stat-bar { grid-template-columns:1fr; }
@@ -312,6 +378,46 @@
             <tr class="empty-row"><td colspan="15">Loading matrix…</td></tr>
           </tbody>
         </table>
+      </div>
+    </section>
+
+    <!-- ============ COMMAND CONSOLE ============ -->
+    <section class="section" id="consoleSection">
+      <div class="section-head">
+        <div class="section-title"><span class="accent">Command</span> Console<span class="cc-sub" id="ccCatStat">loading catalog…</span></div>
+        <div class="legend">
+          <span class="legend-item">multivendor library → run live · read-only by default</span>
+        </div>
+      </div>
+      <div class="cc-grid">
+        <!-- left: command library -->
+        <div class="cc-library">
+          <div class="cc-lib-head">
+            <input type="search" id="ccSearch" class="cc-input" placeholder="Search commands…" autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="cc-vendors" id="ccVendors"></div>
+          <div class="cc-cmdlist" id="ccCmdList">
+            <div class="cc-empty">Loading command library…</div>
+          </div>
+        </div>
+        <!-- right: console -->
+        <div class="cc-console">
+          <div class="cc-run-row">
+            <select id="ccNode" class="cc-select" aria-label="Target node"></select>
+            <input type="text" id="ccCmd" class="cc-input cc-cmd" placeholder="show ip bgp summary" autocomplete="off" spellcheck="false" />
+            <button class="btn cc-run" id="ccRun">Run ▸</button>
+          </div>
+          <div class="cc-opts">
+            <label class="cc-write" id="ccWriteLbl" title="Allow configuration / mutating commands (local lab sandbox only)">
+              <input type="checkbox" id="ccWrite" /> write mode
+            </label>
+            <span class="cc-target-meta" id="ccTargetMeta">—</span>
+            <span class="control-spacer"></span>
+            <button class="cc-clear" id="ccClear">clear</button>
+          </div>
+          <pre class="cc-output" id="ccOutput"><span class="cc-dim">› pick a node and a command — or click any command from the library on the left.
+  Arista cEOS → Cli · FRR → vtysh · Nokia SR Linux → sr_cli · NAPALM getters → structured JSON.</span></pre>
+        </div>
       </div>
     </section>
 

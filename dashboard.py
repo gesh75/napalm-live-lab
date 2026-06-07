@@ -20,6 +20,7 @@ Features:
 """
 
 import os
+import re
 import json
 import time
 import difflib
@@ -47,6 +48,8 @@ from napalm_lab import (
     lab_collect_parallel as collect_site_parallel,
     napalm_matrix, lab_topology, collect_node, runner_available,
 )
+# Command Console: curated multivendor command catalog + secure live exec.
+from command_lib import catalog as cmd_catalog, run_command, run_getter
 # NetBox helpers remain available for the (now optional) netbox-audit tool.
 from core import (
     open_device,
@@ -59,6 +62,29 @@ CORS(app)
 
 SNAPSHOTS_DIR = OUTPUT_DIR / "snapshots"
 SNAPSHOTS_DIR.mkdir(exist_ok=True)
+
+# Snapshot filenames are confined to SNAPSHOTS_DIR — never trust caller-supplied
+# paths. Used by the snapshot list/diff endpoints to prevent path traversal.
+_SNAP_NAME_RE = re.compile(r"^[A-Za-z0-9_.-]+\.json$")
+
+
+def _safe_snapshot_path(name: str):
+    """Resolve a snapshot filename to a path inside SNAPSHOTS_DIR, or None."""
+    name = (name or "").strip()
+    if not name or not _SNAP_NAME_RE.match(name):
+        return None
+    p = (SNAPSHOTS_DIR / name).resolve()
+    try:
+        p.relative_to(SNAPSHOTS_DIR.resolve())
+    except ValueError:
+        return None
+    return p
+
+
+def _safe_label(label: str) -> str:
+    """Sanitize a snapshot label to a filename-safe token."""
+    cleaned = re.sub(r"[^A-Za-z0-9_-]", "", (label or ""))[:32]
+    return cleaned or "snapshot"
 
 # ── In-memory job tracking ──────────────────────────────────────────────────
 _jobs = {}
@@ -161,6 +187,57 @@ def api_lab_node(hostname):
     if hostname not in NODE_INDEX:
         return jsonify({"error": f"unknown node: {hostname}"}), 404
     return jsonify(collect_node(hostname))
+
+
+# ── Command Console (curated multivendor catalog + secure live exec) ─────────────
+
+@app.route("/api/lab/commands")
+def api_lab_commands():
+    """Curated multivendor command catalog + live read-only policy."""
+    return jsonify(cmd_catalog())
+
+
+@app.route("/api/lab/console/nodes")
+def api_lab_console_nodes():
+    """Run targets for the console dropdown (hostname + how it's reached)."""
+    wrapper = {"eos": "Cli", "frr": "vtysh", "srl": "sr_cli"}
+    nodes = [{
+        "hostname": h, "fabric": n["fabric"], "tier": n["tier"],
+        "vendor": n["vendor"], "driver": n["driver"],
+        "wrapper": wrapper.get(n["driver"], "—"),
+    } for h, n in NODE_INDEX.items()]
+    return jsonify({"nodes": nodes})
+
+
+@app.route("/api/lab/run", methods=["POST"])
+def api_lab_run():
+    """Run one CLI command against a live lab node (read-only by default)."""
+    body = request.get_json(silent=True) or {}
+    hostname = (body.get("hostname") or "").strip()
+    command = body.get("command") or ""
+    allow_write = bool(body.get("allow_write"))
+    if not hostname or not command:
+        return jsonify({"error": "hostname and command are required"}), 400
+    if hostname not in NODE_INDEX:
+        return jsonify({"error": f"unknown node: {hostname}"}), 404
+    result = run_command(hostname, command, allow_write=allow_write)
+    # 200 for a successful run or a deliberately-blocked (policy) command;
+    # 502 when the upstream node was unreachable / docker errored.
+    status = 200 if (result.get("ok") or result.get("blocked")) else 502
+    return jsonify(result), status
+
+
+@app.route("/api/lab/getter", methods=["POST"])
+def api_lab_getter():
+    """Run a single NAPALM getter against a live lab node (structured JSON)."""
+    body = request.get_json(silent=True) or {}
+    hostname = (body.get("hostname") or "").strip()
+    getter = (body.get("getter") or "").strip()
+    if not hostname or not getter:
+        return jsonify({"error": "hostname and getter are required"}), 400
+    if hostname not in NODE_INDEX:
+        return jsonify({"error": f"unknown node: {hostname}"}), 404
+    return jsonify(run_getter(hostname, getter))
 
 
 # ── API: Status & Config ────────────────────────────────────────────────────
@@ -766,7 +843,7 @@ def take_snapshot():
     """Take a snapshot of current device state (pre or post change)."""
     data = request.json or {}
     site = data.get("site", "").lower()
-    label = data.get("label", "snapshot")  # "pre" or "post"
+    label = _safe_label(data.get("label", "snapshot"))  # "pre" / "post" — sanitized
     if not site or site not in SITES:
         return jsonify({"error": f"Unknown site: {site}"}), 400
 
@@ -807,6 +884,8 @@ def take_snapshot():
 @app.route("/api/tools/snapshots/<site>")
 def list_snapshots(site):
     """List all snapshots for a site."""
+    if site.lower() not in SITES:
+        return jsonify({"error": f"unknown site: {site}"}), 404
     site = site.upper()
     snaps = sorted(SNAPSHOTS_DIR.glob(f"{site}_*.json"), reverse=True)
     return jsonify([{
@@ -823,8 +902,10 @@ def snapshot_diff():
     file_a = data.get("file_a", "")
     file_b = data.get("file_b", "")
 
-    path_a = SNAPSHOTS_DIR / file_a
-    path_b = SNAPSHOTS_DIR / file_b
+    path_a = _safe_snapshot_path(file_a)
+    path_b = _safe_snapshot_path(file_b)
+    if path_a is None or path_b is None:
+        return jsonify({"error": "Invalid snapshot filename"}), 400
     if not path_a.exists() or not path_b.exists():
         return jsonify({"error": "Snapshot file not found"}), 404
 

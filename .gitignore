@@ -14,9 +14,13 @@ env/
 .env.*
 *.local
 
-# Generated collection artifacts
+# Generated collection artifacts — may contain real device data, NEVER commit
 output/
+output/**
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Playwright
+.playwright-mcp/

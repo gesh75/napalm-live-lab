@@ -4,7 +4,7 @@ BGP Live Collection — NAPALM version
 Replaces: 04_Scripts_Tools/Analysis/dc3_bgp_live_collection.py
           04_Scripts_Tools/Analysis/dc3_bgp_live_verification.py
 
-Connects to routers/switches via NAPALM (gandalf key),
+Connects to routers/switches via NAPALM (SSH key),
 fetches structured BGP neighbor data, prints a summary table,
 and saves a JSON + Markdown report.
 
@@ -58,7 +58,7 @@ def generate_report(site: str, results: dict, summary: dict) -> str:
     lines = [
         f"# {site.upper()} BGP Live Status",
         f"**Generated:** {ts}  ",
-        f"**SSH User:** gandalf (NAPALM)  \n",
+        f"**SSH User:** netops (NAPALM)  \n",
     ]
 
     # ── Per-device BGP peer table
