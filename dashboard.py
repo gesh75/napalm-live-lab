@@ -117,6 +117,13 @@ def _update_job(job_id: str, **kwargs):
 
 @app.route("/")
 def index():
+    # The Live Lab view (matrix + Command Console + topology) is now the home page.
+    return send_from_directory(".", "lab.html")
+
+
+@app.route("/classic")
+def classic():
+    # The classic audit/snapshot tools dashboard.
     return send_from_directory(".", "dashboard.html")
 
 

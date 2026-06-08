@@ -214,8 +214,20 @@ python3 build_command_catalog.py
 # 3. Run the dashboard
 python3 dashboard.py            # serves on http://127.0.0.1:5959
 
-# 4. Open the lab UI
-open http://127.0.0.1:5959/lab
+# 4. Open it — the Live Lab is the home page
+open http://127.0.0.1:5959/     # matrix + Command Console + topology
+#   classic audit/snapshot tools live at /classic
+```
+
+### Bring the lab back to green after a Docker restart
+
+A Docker Desktop restart destroys the containerlab data-plane veths, so a plain
+`docker start` won't restore BGP. One command does the full repair
+(`clab deploy --reconfigure` + SRL/FRR post-deploy + verify):
+
+```bash
+./relab.sh            # redeploy CLOS + post-deploy + verify 19/19 green
+./relab.sh verify     # just check the live coverage matrix (no changes)
 ```
 
 > Override the port with `DASHBOARD_PORT`. Override lab credentials with the
