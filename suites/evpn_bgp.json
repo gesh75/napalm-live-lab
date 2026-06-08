@@ -1,0 +1,10 @@
+{
+  "id": "evpn_bgp",
+  "name": "CLOS-EVPN BGP",
+  "description": "BGP health on the CLOS-EVPN fabric (eos/frr nodes): peers present and established.",
+  "tags": ["bgp", "clos", "evpn"],
+  "checks": [
+    {"use": "bgp-peers-present", "target": {"fabric": "clos", "driver": ["eos", "frr"]}},
+    {"use": "bgp-all-up", "target": {"fabric": "clos", "driver": ["eos", "frr"]}}
+  ]
+}

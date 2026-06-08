@@ -98,6 +98,19 @@ python3 build_command_catalog.py     # writes command_catalog.json
   command for the node's driver, so the same intent works on Arista / FRR / SR Linux.
   Per-vendor command map is vendored from the driver layer in `universal_commands.py`.
 
+### Test platform
+
+- `GET /api/test/checks` (built-in checks) · `GET /api/test/suites` · `GET /api/test/suites/<id>`
+- `POST /api/test/assert` `{hostname, source, field, op, expected, quantifier}` — one ad-hoc assertion
+- `POST /api/test/run` `{suite_id, fabric}` → `{run_id}` (async) · `GET /api/test/runs` (history) · `GET /api/test/runs/<run_id>`
+- `GET /api/test/runs/<run_id>/export?format=junit|html|json`
+
+Define checks (assertion + target selector + getter/command/intent source), group them into
+**suites** (`suites/*.json`), run a suite against the live fabric, and get pass/fail. The runner
+collects each node once, evaluates all checks, and persists every run to SQLite
+(`output/test_runs.db`). Export JUnit XML to gate CI. Modules: `assertions.py`, `jsonpath.py`,
+`checks.py`, `checks_builtin.py`, `suites.py`, `runner.py`, `results.py`, `exporters.py`.
+
 ## Operate
 
 ```bash

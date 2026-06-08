@@ -50,6 +50,14 @@ from napalm_lab import (
 )
 # Command Console: curated multivendor command catalog + secure live exec.
 from command_lib import catalog as cmd_catalog, run_command, run_getter, run_intent
+# Test platform: assertion engine + checks + suites + runner + persistent results.
+import checks as checks_mod
+import exporters
+import results as results_store
+from checks import CheckResult, evaluate_check, resolve_targets
+from checks_builtin import BUILTIN_CHECKS
+from runner import run_suite
+from suites import load_all_suites, load_suite, suite_summary, SUITES_DIR
 # NetBox helpers remain available for the (now optional) netbox-audit tool.
 from core import (
     open_device,
@@ -261,6 +269,124 @@ def api_lab_getter():
     if hostname not in NODE_INDEX:
         return jsonify({"error": f"unknown node: {hostname}"}), 404
     return jsonify(run_getter(hostname, getter))
+
+
+# ── Test platform: assertions, checks, suites, runs ──────────────────────────────
+
+@app.route("/api/test/checks")
+def api_test_checks():
+    """Built-in check library (compose these into suites)."""
+    return jsonify({"checks": BUILTIN_CHECKS})
+
+
+@app.route("/api/test/suites")
+def api_test_suites():
+    """List all test suites with their checks."""
+    suites = load_all_suites()
+    return jsonify({"suites": [suite_summary(s) for s in suites.values()]})
+
+
+@app.route("/api/test/suites/<sid>")
+def api_test_suite(sid):
+    s = load_all_suites().get(sid)
+    if not s:
+        return jsonify({"error": f"unknown suite: {sid}"}), 404
+    return jsonify(suite_summary(s))
+
+
+@app.route("/api/test/assert", methods=["POST"])
+def api_test_assert():
+    """Run one ad-hoc assertion against a node (getter / command / intent)."""
+    body = request.get_json(silent=True) or {}
+    hostname = (body.get("hostname") or "").strip()
+    if hostname not in NODE_INDEX:
+        return jsonify({"error": f"unknown node: {hostname}"}), 404
+    try:
+        check = checks_mod.from_dict({
+            "id": "adhoc", "name": body.get("name") or "ad-hoc assertion",
+            "target": {"hostname": hostname}, "source": body.get("source") or {"node": True},
+            "field": body.get("field") or "", "op": body.get("op"),
+            "expected": body.get("expected"), "quantifier": body.get("quantifier") or "value",
+        })
+    except Exception as e:  # noqa: BLE001
+        return jsonify({"error": f"invalid assertion: {e}"}), 400
+
+    src = check.source
+    if "command" in src:
+        r = run_command(hostname, src["command"])
+        root = {"output": r.get("output", ""), "ok": r.get("ok"), "rc": r.get("rc")}
+    elif "intent" in src:
+        root = run_intent(hostname, src["intent"])
+    else:
+        getters = [src["getter"]] if "getter" in src else ["get_facts"]
+        root = collect_node(hostname, getters)
+    ar = evaluate_check(check, root)
+    return jsonify({"hostname": hostname, "field": check.field, "op": check.op,
+                    "quantifier": check.quantifier, "expected": check.expected,
+                    "observed": ar.observed, "passed": ar.passed, "message": ar.message})
+
+
+@app.route("/api/test/run", methods=["POST"])
+def api_test_run():
+    """Run a suite against the live lab (async). Returns a run_id to poll."""
+    body = request.get_json(silent=True) or {}
+    sid = (body.get("suite_id") or "").strip()
+    fabric = (body.get("fabric") or "all").strip().lower()
+    suite = load_all_suites().get(sid)
+    if not suite:
+        return jsonify({"error": f"unknown suite: {sid}"}), 404
+    if not suite.checks:
+        return jsonify({"error": f"suite '{sid}' failed to load: {suite.description}"}), 400
+
+    # Generate the run_id up front and persist a "running" row so the client can
+    # poll immediately while the suite executes in the background.
+    from runner import _new_run_id
+    run_id = _new_run_id()
+    pending = results_store.SuiteRun(run_id=run_id, suite_id=sid,
+                                     suite_name=suite.name, fabric=fabric)
+    results_store.save_run(pending)
+
+    def _go():
+        try:
+            run = run_suite(suite, fabric_filter=fabric)
+            run.run_id = run_id  # keep the id we already returned
+            results_store.save_run(run)
+        except Exception as e:  # noqa: BLE001
+            pending.status = "error"
+            pending.error = str(e)
+            pending.finished = datetime.now().isoformat(timespec="seconds")
+            results_store.save_run(pending)
+
+    threading.Thread(target=_go, daemon=True).start()
+    return jsonify({"run_id": run_id, "suite_id": sid, "status": "running"})
+
+
+@app.route("/api/test/runs")
+def api_test_runs():
+    sid = request.args.get("suite_id")
+    limit = min(int(request.args.get("limit", 50)), 200)
+    return jsonify({"runs": results_store.list_runs(limit=limit, suite_id=sid)})
+
+
+@app.route("/api/test/runs/<run_id>")
+def api_test_run_detail(run_id):
+    run = results_store.get_run(run_id)
+    if not run:
+        return jsonify({"error": f"unknown run: {run_id}"}), 404
+    return jsonify(run)
+
+
+@app.route("/api/test/runs/<run_id>/export")
+def api_test_run_export(run_id):
+    run = results_store.get_run(run_id)
+    if not run:
+        return jsonify({"error": f"unknown run: {run_id}"}), 404
+    fmt = (request.args.get("format") or "json").lower()
+    if fmt == "junit":
+        return app.response_class(exporters.to_junit(run), mimetype="application/xml")
+    if fmt == "html":
+        return app.response_class(exporters.to_html(run), mimetype="text/html")
+    return jsonify(exporters.to_json(run))
 
 
 # ── API: Status & Config ────────────────────────────────────────────────────

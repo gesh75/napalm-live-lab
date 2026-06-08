@@ -273,6 +273,31 @@
   .cc-output .cc-echo { color:var(--accent-blue); font-weight:700; }
   .cc-output .cc-dim { color:var(--text-muted); }
 
+  /* ---------- Tests & Validation ---------- */
+  .test-controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; }
+  .test-controls .cc-select { min-width:180px; }
+  .stat-card.t-pass::before { background:var(--accent-green); }
+  .stat-card.t-fail::before { background:var(--accent-red); }
+  .stat-card.t-err::before  { background:var(--accent-orange); }
+  .stat-card.t-pass .stat-num { color:var(--accent-green); }
+  .stat-card.t-fail .stat-num { color:var(--accent-red); }
+  .stat-card.t-err .stat-num  { color:var(--accent-orange); }
+  .test-verdict { font-size:15px; font-weight:800; margin:2px 0 14px; }
+  .test-verdict.pass { color:var(--accent-green); }
+  .test-verdict.fail { color:var(--accent-red); }
+  .test-badge { display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.3px; }
+  .test-badge.pass  { color:var(--accent-green);  background:rgba(63,185,80,.12);  border:1px solid rgba(63,185,80,.35); }
+  .test-badge.fail  { color:var(--accent-red);    background:rgba(248,81,73,.12);  border:1px solid rgba(248,81,73,.35); }
+  .test-badge.error { color:var(--accent-orange); background:rgba(210,153,34,.12); border:1px solid rgba(210,153,34,.35); }
+  table.matrix tbody tr.test-failrow td:first-child { box-shadow:inset 3px 0 0 var(--accent-red); }
+  .test-export { display:inline-flex; gap:8px; }
+  .test-export .btn { padding:5px 11px; font-size:12px; }
+  .test-detail { font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--text-secondary); white-space:nowrap; max-width:420px; overflow:hidden; text-overflow:ellipsis; }
+  .test-sev { font-size:11px; text-transform:uppercase; letter-spacing:.4px; color:var(--text-muted); }
+  .hist-row { cursor:default; }
+  .hist-result.pass { color:var(--accent-green); font-weight:700; }
+  .hist-result.fail { color:var(--accent-red); font-weight:700; }
+
   /* ---------- Responsive ---------- */
   @media (max-width:1000px) {
     .stat-bar { grid-template-columns:repeat(2,1fr); }
@@ -418,6 +443,60 @@
           <pre class="cc-output" id="ccOutput"><span class="cc-dim">› pick a node and a command — or click any command from the library on the left.
   Arista cEOS → Cli · FRR → vtysh · Nokia SR Linux → sr_cli · NAPALM getters → structured JSON.</span></pre>
         </div>
+      </div>
+    </section>
+
+    <!-- ============ TESTS & VALIDATION ============ -->
+    <section class="section" id="testsSection">
+      <div class="section-head">
+        <div class="section-title"><span class="accent">Tests</span> &amp; Validation<span class="cc-sub" id="testStat"></span></div>
+        <div class="legend"><span class="legend-item">define a suite · run it live · pass / fail · export JUnit for CI</span></div>
+      </div>
+
+      <div class="test-controls">
+        <select id="testSuite" class="cc-select" aria-label="Test suite"></select>
+        <select id="testFabric" class="cc-select" aria-label="Fabric filter">
+          <option value="all">All fabrics</option>
+          <option value="clos">CLOS-EVPN</option>
+          <option value="dcn">3-Tier</option>
+        </select>
+        <button class="btn cc-run" id="testRun">Run Suite ▸</button>
+        <span class="control-spacer"></span>
+        <span class="test-export" id="testExport" style="display:none">
+          <a class="btn" id="exportJunit" target="_blank" rel="noopener">JUnit XML</a>
+          <a class="btn" id="exportHtml" target="_blank" rel="noopener">HTML</a>
+          <a class="btn" id="exportJson" target="_blank" rel="noopener">JSON</a>
+        </span>
+      </div>
+
+      <div class="test-verdict" id="testVerdict" style="display:none"></div>
+
+      <section class="stat-bar" id="testStats" style="display:none">
+        <div class="stat-card"><div class="stat-num" id="tsTotal">—</div><div class="stat-lbl">Checks</div></div>
+        <div class="stat-card t-pass"><div class="stat-num" id="tsPass">—</div><div class="stat-lbl">Passed</div></div>
+        <div class="stat-card t-fail"><div class="stat-num" id="tsFail">—</div><div class="stat-lbl">Failed</div></div>
+        <div class="stat-card t-err"><div class="stat-num" id="tsErr">—</div><div class="stat-lbl">Errored</div></div>
+      </section>
+
+      <div class="table-wrap" id="testResultsWrap" style="display:none; margin-bottom:18px;">
+        <table class="matrix">
+          <thead><tr>
+            <th>Status</th><th>Node</th><th>Check</th><th>Severity</th><th>Detail</th><th>ms</th>
+          </tr></thead>
+          <tbody id="testResultsBody"></tbody>
+        </table>
+      </div>
+
+      <div class="section-head" style="margin-top:8px">
+        <div class="section-title" style="font-size:14px">Recent runs</div>
+      </div>
+      <div class="table-wrap">
+        <table class="matrix">
+          <thead><tr>
+            <th>Started</th><th>Suite</th><th>Fabric</th><th>Result</th><th>Passed</th><th>Failed</th><th></th>
+          </tr></thead>
+          <tbody id="testHistoryBody"><tr class="empty-row"><td colspan="7">No runs yet.</td></tr></tbody>
+        </table>
       </div>
     </section>
 

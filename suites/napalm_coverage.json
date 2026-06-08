@@ -1,0 +1,11 @@
+{
+  "id": "napalm_coverage",
+  "name": "NAPALM Coverage",
+  "description": "Validates the honest NAPALM coverage story: native collection on eos/srl, facts everywhere.",
+  "tags": ["napalm", "coverage"],
+  "checks": [
+    {"use": "facts-ok"},
+    {"use": "napalm-native"},
+    {"use": "os-version-present"}
+  ]
+}

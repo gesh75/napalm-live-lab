@@ -772,6 +772,146 @@
     });
   }
 
+  // ---- Tests & Validation --------------------------------------------------
+  const TESTS = { suites: [], lastRunId: null };
+
+  function tShow(id, disp) { const n = document.getElementById(id); if (n) n.style.display = disp || ""; }
+
+  async function initTests() {
+    try {
+      const data = await getJSON("/api/test/suites");
+      TESTS.suites = (data && data.suites) || [];
+    } catch (err) { TESTS.suites = []; }
+    const sel = document.getElementById("testSuite");
+    if (sel) {
+      sel.innerHTML = "";
+      for (const s of TESTS.suites) {
+        const o = document.createElement("option");
+        o.value = s.id;
+        o.textContent = s.name + " (" + s.check_count + " checks)";
+        sel.appendChild(o);
+      }
+    }
+    const stat = document.getElementById("testStat");
+    if (stat) stat.textContent = TESTS.suites.length + " suites · run live, export JUnit / HTML / JSON";
+    const runBtn = document.getElementById("testRun");
+    if (runBtn) runBtn.addEventListener("click", runTestSuite);
+    loadTestHistory();
+  }
+
+  async function runTestSuite() {
+    const sel = document.getElementById("testSuite");
+    const fab = document.getElementById("testFabric");
+    const btn = document.getElementById("testRun");
+    if (!sel || !sel.value) return;
+    if (btn) { btn.disabled = true; btn.textContent = "Running…"; }
+    tShow("testExport", "none");
+
+    let runId = null;
+    try {
+      const r = await postJSON("/api/test/run", { suite_id: sel.value, fabric: fab ? fab.value : "all" });
+      runId = r && r.run_id;
+    } catch (e) { /* fall through */ }
+    if (!runId) { if (btn) { btn.disabled = false; btn.textContent = "Run Suite ▸"; } return; }
+
+    const t0 = Date.now();
+    while (Date.now() - t0 < 120000) {
+      let run = null;
+      try { run = await getJSON("/api/test/runs/" + encodeURIComponent(runId)); } catch (e) { break; }
+      if (run && run.status === "done") { renderTestRun(run); break; }
+      if (run && run.status === "error") {
+        const v = document.getElementById("testVerdict");
+        if (v) { v.style.display = ""; v.className = "test-verdict fail"; v.textContent = "Run errored: " + (run.error || "unknown"); }
+        break;
+      }
+      await new Promise(function (r) { setTimeout(r, 1500); });
+    }
+    if (btn) { btn.disabled = false; btn.textContent = "Run Suite ▸"; }
+    loadTestHistory();
+  }
+
+  function renderTestRun(run) {
+    const t = run.totals || {};
+    setText("tsTotal", t.total); setText("tsPass", t.passed);
+    setText("tsFail", t.failed); setText("tsErr", t.errored);
+    tShow("testStats", "");
+
+    const pass = (t.failed || 0) === 0 && (t.errored || 0) === 0;
+    const v = document.getElementById("testVerdict");
+    if (v) {
+      v.style.display = "";
+      v.className = "test-verdict " + (pass ? "pass" : "fail");
+      v.textContent = (pass ? "✓ PASSED — " : "✗ FAILED — ") +
+        (t.passed || 0) + "/" + (t.total || 0) + " checks passed" +
+        (t.failed ? " · " + t.failed + " failed" : "") +
+        (t.errored ? " · " + t.errored + " errored" : "");
+    }
+
+    const body = document.getElementById("testResultsBody");
+    if (body) {
+      body.innerHTML = "";
+      const rows = (run.results || []).slice().sort(function (a, b) {
+        const av = a.errored ? 0 : (a.passed ? 2 : 1);   // errors, then fails, then passes
+        const bv = b.errored ? 0 : (b.passed ? 2 : 1);
+        return av - bv;
+      });
+      for (const r of rows) body.appendChild(testRow(r));
+      tShow("testResultsWrap", "");
+    }
+    setExport(run.run_id);
+  }
+
+  function testRow(r) {
+    let badge = "PASS", cls = "pass";
+    if (r.errored) { badge = "ERROR"; cls = "error"; }
+    else if (!r.passed) { badge = "FAIL"; cls = "fail"; }
+    return el("tr", (!r.passed || r.errored) ? { class: "test-failrow" } : null, [
+      el("td", null, [el("span", { class: "test-badge " + cls }, badge)]),
+      el("td", { style: { fontFamily: "ui-monospace, monospace", color: C.blue } }, txt(r.hostname)),
+      el("td", null, txt(r.name)),
+      el("td", null, [el("span", { class: "test-sev" }, txt(r.severity))]),
+      el("td", null, [el("span", { class: "test-detail", title: txt(r.message) }, txt(r.message))]),
+      el("td", { style: { textAlign: "right", color: C.muted, fontFamily: "ui-monospace, monospace" } },
+        r.duration_ms != null ? r.duration_ms + "ms" : "—"),
+    ]);
+  }
+
+  function setExport(runId) {
+    TESTS.lastRunId = runId;
+    const base = "/api/test/runs/" + encodeURIComponent(runId) + "/export?format=";
+    const set = function (id, fmt) { const a = document.getElementById(id); if (a) a.href = base + fmt; };
+    set("exportJunit", "junit"); set("exportHtml", "html"); set("exportJson", "json");
+    tShow("testExport", "inline-flex");
+  }
+
+  async function loadTestHistory() {
+    const body = document.getElementById("testHistoryBody");
+    if (!body) return;
+    let runs = [];
+    try { const d = await getJSON("/api/test/runs?limit=15"); runs = (d && d.runs) || []; } catch (e) { /* keep empty */ }
+    body.innerHTML = "";
+    if (!runs.length) {
+      body.appendChild(el("tr", { class: "empty-row" }, [el("td", { colspan: 7 }, "No runs yet.")]));
+      return;
+    }
+    for (const r of runs) {
+      const pass = (r.failed || 0) === 0 && (r.errored || 0) === 0 && r.status === "done";
+      const resultTxt = r.status !== "done" ? r.status : (pass ? "PASS" : "FAIL");
+      body.appendChild(el("tr", { class: "hist-row" }, [
+        el("td", { style: { color: C.sub, fontFamily: "ui-monospace, monospace", fontSize: "12px" } }, txt(r.started)),
+        el("td", null, txt(r.suite_name)),
+        el("td", null, txt(r.fabric)),
+        el("td", null, [el("span", { class: "hist-result " + (pass ? "pass" : "fail") }, resultTxt)]),
+        el("td", null, txt(r.passed)),
+        el("td", null, txt(r.failed)),
+        el("td", null, [el("a", {
+          href: "/api/test/runs/" + encodeURIComponent(r.run_id) + "/export?format=html",
+          target: "_blank", rel: "noopener", style: { fontSize: "12px" },
+        }, "report ↗")]),
+      ]));
+    }
+  }
+
   // ---- Orchestration -------------------------------------------------------
   /** Render everything for the active fabric (matrix + relevant topologies). */
   function renderAll() {
@@ -840,6 +980,9 @@
 
     // Command Console (independent of fabric toggles; loads its own catalog).
     initConsole();
+
+    // Tests & Validation (loads suites + run history).
+    initTests();
   }
 
   if (document.readyState === "loading") {

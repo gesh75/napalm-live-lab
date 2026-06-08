@@ -1,0 +1,14 @@
+{
+  "id": "fabric_health",
+  "name": "Fabric Health",
+  "description": "Day-1 validation: every node reachable, facts collect, BGP present and up.",
+  "tags": ["health", "day1"],
+  "checks": [
+    {"use": "all-reachable"},
+    {"use": "facts-ok"},
+    {"use": "os-version-present"},
+    {"use": "bgp-peers-present"},
+    {"use": "bgp-all-up"},
+    {"use": "version-via-intent"}
+  ]
+}

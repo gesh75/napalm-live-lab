@@ -6,7 +6,7 @@
 [![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![NAPALM](https://img.shields.io/badge/NAPALM-4.1%2B-2C8EBB)](https://napalm.readthedocs.io/)
 [![containerlab](https://img.shields.io/badge/containerlab-multivendor-0E7FC0?logo=docker&logoColor=white)](https://containerlab.dev/)
-[![tests](https://img.shields.io/badge/tests-87%20passing-3FB950?logo=pytest&logoColor=white)](#tests)
+[![tests](https://img.shields.io/badge/tests-107%20passing-3FB950?logo=pytest&logoColor=white)](#tests)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 ---
@@ -237,6 +237,47 @@ Set this for any shared or exposed deployment. With it on, `write_mode_allowed()
 
 ---
 
+## Test platform
+
+The lab is also a **network test/validation platform** — define checks, run them as
+a suite against the live fabric, and get pass/fail with CI-gradeable reports. It
+composes the existing collectors (no re-collection per check): the runner computes
+the union of getters each node needs, collects each node **once** in parallel, then
+evaluates every check against that cached state.
+
+```mermaid
+sequenceDiagram
+    participant UI as Tests UI
+    participant API as /api/test/run
+    participant Run as runner.run_suite
+    participant Lab as live fabric
+    participant DB as SQLite (results)
+    UI->>API: POST {suite_id, fabric}
+    API->>Run: async (returns run_id to poll)
+    Run->>Lab: collect each target node ONCE (union of getters)
+    Run->>Run: evaluate every check (assertions + jsonpath)
+    Run->>DB: persist SuiteRun (survives restarts)
+    UI->>API: GET /api/test/runs/<run_id> (poll → done)
+    UI->>API: GET …/export?format=junit|html|json
+```
+
+- **Assertion engine** (`assertions.py` + `jsonpath.py`): `op` ∈ eq/ne/lt/lte/gt/gte/contains/regex/in/exists/nonempty/between, with `*` wildcard paths and `all`/`any`/`count` quantifiers — e.g. "are **all** `…peers.*.is_up` == true?".
+- **Declarative checks** (`checks.py` + `checks_builtin.py`): a check binds a **target selector** (by fabric/tier/vendor/driver/hostname), a **source** (getter / command / universal intent / node field), a jsonpath **field**, an assertion, and a severity. Ships ~7 built-ins (all-reachable, facts-ok, bgp-peers-present, bgp-all-up, napalm-native, …).
+- **Suites** (`suites/*.json`): `fabric_health`, `napalm_coverage`, `evpn_bgp`. Composable, validated on load.
+- **Persistent results** (`results.py`): every run is stored in SQLite (`output/test_runs.db`) so history survives the launchd restarts that wipe in-memory state.
+- **Exporters** (`exporters.py`): **JUnit XML** (Jenkins/GitHub Actions can gate on it), self-contained **HTML** report, or raw **JSON**.
+- **Tests UI**: pick a suite + fabric, **Run Suite**, get a pass/fail verdict, a per-check results table (failures first), run history, and one-click export.
+
+```bash
+# run a suite from the CLI (JUnit for CI):
+RID=$(curl -s -XPOST -H 'Content-Type: application/json' -d '{"suite_id":"fabric_health"}' \
+      http://127.0.0.1:5959/api/test/run | python3 -c 'import sys,json;print(json.load(sys.stdin)["run_id"])')
+curl -s "http://127.0.0.1:5959/api/test/runs/$RID/export?format=junit"
+```
+
+> The checks are **honest**: e.g. `bgp-all-up` will report `8/9 satisfy eq True` and FAIL
+> if a real BGP session is down — it surfaces the truth, it doesn't rubber-stamp.
+
 ## Quickstart
 
 ```bash
@@ -328,11 +369,11 @@ See [`SECURITY.md`](./SECURITY.md) for the full policy.
 
 ## Tests
 
-87 hermetic pytest tests (no live fabric required) cover the collector, the catalog loader, and the read-only/security guard.
+107 hermetic pytest tests (no live fabric required) cover the collector, the catalog loader, and the read-only/security guard.
 
 ```bash
 source venv/bin/activate
-pytest tests/ -q          # 87 passed
+pytest tests/ -q          # 107 passed
 ```
 
 ---
@@ -346,11 +387,16 @@ pytest tests/ -q          # 87 passed
 | `command_lib.py` | Command Console backend — catalog loader + `run_command`/`run_getter` with the read-only guard. |
 | `build_command_catalog.py` | Builds `command_catalog.json` from a **private** corpus (corpus not shipped). |
 | `command_catalog.json` | 2,361 curated single-line operational commands (public-safe, no secrets). |
-| `dashboard.py` | Flask routes incl. `/api/lab/{commands,console/nodes,run,getter,intent,matrix,topology}`. |
+| `universal_commands.py` | Per-vendor intent→command map (vendored from the driver layer) — one logical command, every vendor. |
+| `assertions.py` / `jsonpath.py` | Pure assertion engine + dotted-path resolver (wildcards, `all`/`any`/`count`). |
+| `checks.py` / `checks_builtin.py` | Declarative Check model, target selectors, built-in check library. |
+| `suites.py` + `suites/*.json` | File-backed test suites (fabric_health, napalm_coverage, evpn_bgp). |
+| `runner.py` / `results.py` / `exporters.py` | Suite runner, SQLite result store, JUnit/HTML/JSON export. |
+| `dashboard.py` | Flask routes incl. `/api/lab/{commands,console/nodes,run,getter,intent,matrix,topology} + /api/test/{assert,checks,suites,run,runs}`. |
 | `lab.html` / `lab.js` / `lab.css` | The `/lab` UI incl. the Command Console (vanilla JS, `textContent` only → XSS-safe). |
 | `lab_runner/collect.py` | Real NAPALM runner (runs inside the `napalm-runner` sidecar). |
 | `core.py` | Legacy NetBox helpers (`NETBOX_URL`/`NETBOX_TOKEN` are env-only). |
-| `tests/` | 87 hermetic tests (pytest), all passing. |
+| `tests/` | 107 hermetic tests (pytest), all passing. |
 | `LICENSE` | MIT. |
 
 ---
