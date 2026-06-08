@@ -61,6 +61,17 @@ How a command reaches the device — by the node's driver:
 | Nokia SR Linux (`srl`) | `sr_cli` | `docker exec clab-clos-evpn-spine1 sr_cli "show version"` |
 | any (`napalm`) | NAPALM getter | structured JSON via `collect_node(host, [getter])` |
 
+**Cross-vendor cheat-sheet** — the same intent is different CLI per vendor.
+Note **SR Linux has no `show running-config`** (it uses `info`); a Cisco/Arista
+command on an SRL node returns an honest device parse error, not a tool bug.
+
+| Task | Arista cEOS | FRR (`vtysh`) | Nokia SR Linux |
+|---|---|---|---|
+| Running config | `show running-config` | `show running-config` | `info from running` |
+| BGP summary | `show ip bgp summary` | `show ip bgp summary` | `show network-instance default protocols bgp neighbor` |
+| Routing table | `show ip route` | `show ip route` | `show network-instance default route-table ipv4-unicast summary` |
+| Live state | `show …` | `show …` | `info from state …` |
+
 **Security (it ships publicly, so it defaults safe):**
 
 - Target host must be in the `NODE_INDEX` allowlist — arbitrary container names never reach `docker exec`.

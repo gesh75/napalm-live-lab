@@ -492,6 +492,22 @@
         </tbody>
       </table>
     </div>
+
+    <h3 style="margin:30px 0 8px;font-size:17px">Cross-vendor command cheat-sheet</h3>
+    <p class="note" style="margin-bottom:14px">Same intent, different CLI. <strong>SR Linux has no <code style="font-family:var(--mono)">show running-config</code></strong> — it uses <code style="font-family:var(--mono);color:var(--cyan)">info</code>. A Cisco/Arista command on an SRL node returns an honest device parse error, not a tool bug.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Task</th><th>Arista cEOS</th><th class="hide-sm">FRR (vtysh)</th><th>Nokia SR Linux</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="note">Running config</td><td><span class="meth">show running-config</span></td><td class="hide-sm"><span class="meth">show running-config</span></td><td><span class="meth" style="color:var(--cyan)">info from running</span></td></tr>
+          <tr><td class="note">BGP summary</td><td><span class="meth">show ip bgp summary</span></td><td class="hide-sm"><span class="meth">show ip bgp summary</span></td><td><span class="meth">show network-instance default protocols bgp neighbor</span></td></tr>
+          <tr><td class="note">Routing table</td><td><span class="meth">show ip route</span></td><td class="hide-sm"><span class="meth">show ip route</span></td><td><span class="meth">show …default route-table ipv4-unicast summary</span></td></tr>
+          <tr><td class="note">Live state</td><td><span class="meth">show …</span></td><td class="hide-sm"><span class="meth">show …</span></td><td><span class="meth" style="color:var(--cyan)">info from state …</span></td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 

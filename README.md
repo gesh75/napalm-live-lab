@@ -174,6 +174,27 @@ A curated catalog of **2,361 single-line operational commands** runs live agains
 | By vendor | Juniper 1,416 · Arista 634 · Cisco 311 |
 | Curated highlights | 31 |
 
+### Cross-vendor command cheat-sheet
+
+The same intent is different CLI on each vendor — most notably **Nokia SR Linux
+has no `show running-config`** (it uses `info`). Running a Cisco/Arista command
+against an SRL node returns an honest device parse error, not a tool bug. The
+curated quick-commands per vendor already use the right syntax:
+
+| Task | Arista cEOS (`Cli`) | FRRouting (`vtysh`) | Nokia SR Linux (`sr_cli`) |
+|---|---|---|---|
+| Version / facts | `show version` | `show version` | `show version` |
+| **Running config** | `show running-config` | `show running-config` | **`info from running`** |
+| Interfaces | `show interfaces status` | `show interface brief` | `show interface brief` |
+| BGP summary | `show ip bgp summary` | `show ip bgp summary` | `show network-instance default protocols bgp neighbor` |
+| Routing table | `show ip route` | `show ip route` | `show network-instance default route-table ipv4-unicast summary` |
+| LLDP neighbors | `show lldp neighbors` | *(no LLDP daemon)* | `show system lldp neighbor` |
+| Operational state | `show …` | `show …` | `info from state …` |
+| Flat/set-style config | *(n/a)* | *(n/a)* | `info flat from running` |
+
+> Rule of thumb for SR Linux: **`show`** is for curated operational views,
+> **`info from state …`** is live state, and **`info from running …`** is config.
+
 ### Read-only guard
 
 A command is allowed by default only if it **starts with a network operational
