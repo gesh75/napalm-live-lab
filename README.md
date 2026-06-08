@@ -172,7 +172,7 @@ A curated catalog of **2,361 single-line operational commands** runs live agains
 | Total commands | 2,361 |
 | Read-only (default-runnable) | 2,361 |
 | By vendor | Juniper 1,416 · Arista 634 · Cisco 311 |
-| Curated highlights | 29 |
+| Curated highlights | 31 |
 
 ### Read-only guard
 

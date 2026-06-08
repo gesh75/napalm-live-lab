@@ -92,6 +92,9 @@ CURATED = {
             ("show platform", "Platform / chassis state", "Facts"),
             ("show system lldp neighbor", "LLDP adjacencies", "Topology"),
             ("info from state interface mgmt0", "Mgmt interface state", "Interfaces"),
+            ("info from running", "Full running configuration (SRL — not 'show running-config')", "Config"),
+            ("info from running network-instance default protocols bgp",
+             "BGP config (running)", "BGP"),
         ],
     },
 }

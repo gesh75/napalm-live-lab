@@ -1,5 +1,5 @@
 {
-  "generated": "2026-06-07T18:12:09",
+  "generated": "2026-06-07T21:48:21",
   "source": "gesh multivendor CLI corpus (7821 records) \u2014 curated",
   "lab_targets": {
     "arista": {
@@ -226,6 +226,18 @@
           "cmd": "info from state interface mgmt0",
           "desc": "Mgmt interface state",
           "cat": "Interfaces",
+          "read_only": true
+        },
+        {
+          "cmd": "info from running",
+          "desc": "Full running configuration (SRL \u2014 not 'show running-config')",
+          "cat": "Config",
+          "read_only": true
+        },
+        {
+          "cmd": "info from running network-instance default protocols bgp",
+          "desc": "BGP config (running)",
+          "cat": "BGP",
           "read_only": true
         }
       ]
@@ -32851,6 +32863,6 @@
     },
     "runnable": 945,
     "read_only": 2361,
-    "curated": 29
+    "curated": 31
   }
 }
