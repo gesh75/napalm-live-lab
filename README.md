@@ -6,7 +6,7 @@
 [![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![NAPALM](https://img.shields.io/badge/NAPALM-4.1%2B-2C8EBB)](https://napalm.readthedocs.io/)
 [![containerlab](https://img.shields.io/badge/containerlab-multivendor-0E7FC0?logo=docker&logoColor=white)](https://containerlab.dev/)
-[![tests](https://img.shields.io/badge/tests-76%20passing-3FB950?logo=pytest&logoColor=white)](#tests)
+[![tests](https://img.shields.io/badge/tests-87%20passing-3FB950?logo=pytest&logoColor=white)](#tests)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 ---
@@ -174,6 +174,26 @@ A curated catalog of **2,361 single-line operational commands** runs live agains
 | By vendor | Juniper 1,416 · Arista 634 · Cisco 311 |
 | Curated highlights | 31 |
 
+### ⚡ Universal commands — one intent, every vendor
+
+A command is vendor-specific, so the console also ships **universal intents**: pick
+a logical operation (Version, BGP summary, OSPF, Interfaces, Interface counters,
+Routes, Memory, CPU) and it runs the **correct command for whatever node you target** —
+no need to know that Arista wants `show ip bgp summary | json`, FRR wants
+`show ip bgp summary json`, and SR Linux wants
+`show network-instance default protocols bgp neighbor`. The per-vendor command map is
+vendored from the gesh multivendor **driver layer** (`universal_commands.py`), tries the
+JSON variant first and falls back to text, and the result shows which command actually ran.
+
+```
+POST /api/lab/intent  {"hostname": "spine1", "intent": "bgp"}
+→ runs "show network-instance default protocols bgp neighbor" on the SR Linux node ✓
+POST /api/lab/intent  {"hostname": "leaf1",  "intent": "bgp"}
+→ runs "show ip bgp summary | json" on the Arista node ✓
+```
+
+Verified live: **all 8 intents run successfully on all three vendors (24/24).**
+
 ### Cross-vendor command cheat-sheet
 
 The same intent is different CLI on each vendor — most notably **Nokia SR Linux
@@ -308,11 +328,11 @@ See [`SECURITY.md`](./SECURITY.md) for the full policy.
 
 ## Tests
 
-76 hermetic pytest tests (no live fabric required) cover the collector, the catalog loader, and the read-only/security guard.
+87 hermetic pytest tests (no live fabric required) cover the collector, the catalog loader, and the read-only/security guard.
 
 ```bash
 source venv/bin/activate
-pytest tests/ -q          # 76 passed
+pytest tests/ -q          # 87 passed
 ```
 
 ---
@@ -326,11 +346,11 @@ pytest tests/ -q          # 76 passed
 | `command_lib.py` | Command Console backend — catalog loader + `run_command`/`run_getter` with the read-only guard. |
 | `build_command_catalog.py` | Builds `command_catalog.json` from a **private** corpus (corpus not shipped). |
 | `command_catalog.json` | 2,361 curated single-line operational commands (public-safe, no secrets). |
-| `dashboard.py` | Flask routes incl. `/api/lab/{commands,console/nodes,run,getter,matrix,topology}`. |
+| `dashboard.py` | Flask routes incl. `/api/lab/{commands,console/nodes,run,getter,intent,matrix,topology}`. |
 | `lab.html` / `lab.js` / `lab.css` | The `/lab` UI incl. the Command Console (vanilla JS, `textContent` only → XSS-safe). |
 | `lab_runner/collect.py` | Real NAPALM runner (runs inside the `napalm-runner` sidecar). |
 | `core.py` | Legacy NetBox helpers (`NETBOX_URL`/`NETBOX_TOKEN` are env-only). |
-| `tests/` | 76 hermetic tests (pytest), all passing. |
+| `tests/` | 87 hermetic tests (pytest), all passing. |
 | `LICENSE` | MIT. |
 
 ---

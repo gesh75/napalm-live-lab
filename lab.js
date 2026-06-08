@@ -464,7 +464,7 @@
   }
 
   // ---- Command Console -----------------------------------------------------
-  const CC = { catalog: null, nodes: [], vendor: "curated", search: "", mode: "cli", maxRows: 350 };
+  const CC = { catalog: null, nodes: [], vendor: "universal", search: "", mode: "cli", intentKey: null, maxRows: 350 };
 
   /** POST helper — returns parsed JSON even on non-2xx (API returns structured errors). */
   async function postJSON(url, body) {
@@ -501,8 +501,10 @@
     const node = document.getElementById("ccCatStat");
     if (!node) return;
     const pol = (CC.catalog && CC.catalog.policy) || {};
+    const uni = ((CC.catalog && CC.catalog.universal) || []).length;
     node.textContent = (s.total != null ? s.total.toLocaleString() : "?") +
-      " commands · " + (s.runnable != null ? s.runnable.toLocaleString() : "?") + " runnable here" +
+      " commands · " + uni + " universal (any vendor) · " +
+      (s.runnable != null ? s.runnable.toLocaleString() : "?") + " runnable here" +
       (pol.write_mode_allowed === false ? " · read-only deployment" : "");
   }
 
@@ -537,7 +539,9 @@
     const curatedCount = stats.curated || 0;
     const getters = (CC.catalog && CC.catalog.napalm_getters) || [];
 
+    const universal = (CC.catalog && CC.catalog.universal) || [];
     const chips = [
+      { key: "universal", label: "⚡ Universal", count: universal.length },
       { key: "curated", label: "★ Quick", count: curatedCount },
       { key: "napalm", label: "NAPALM", count: getters.length },
     ];
@@ -569,6 +573,7 @@
     list.innerHTML = "";
     const q = (CC.search || "").trim().toLowerCase();
 
+    if (CC.vendor === "universal") return renderUniversal(list, q);
     if (CC.vendor === "curated") return renderCurated(list, q);
     if (CC.vendor === "napalm") return renderGetters(list, q);
 
@@ -586,6 +591,34 @@
     if (!items.length) { list.appendChild(emptyMsg("No commands match.")); return; }
     for (const c of items) list.appendChild(cmdItem(c.cmd, c.cat + " · " + (c.desc || c.title || ""), c.runnable_on && c.runnable_on.length, "cli", c.runnable_on));
     if (items.length > CC.maxRows) list.appendChild(emptyMsg("…refine your search to see more."));
+  }
+
+  /** Universal intents — one logical command that runs on EVERY vendor. */
+  function renderUniversal(list, q) {
+    const items = (CC.catalog && CC.catalog.universal) || [];
+    const matching = items.filter(function (g) {
+      return !q || g.intent.indexOf(q) !== -1 || (g.label || "").toLowerCase().indexOf(q) !== -1;
+    });
+    if (!matching.length) { list.appendChild(emptyMsg("No universal commands match.")); return; }
+    list.appendChild(el("div", { class: "cc-group-label" }, "Universal · adapts to each node's vendor"));
+    for (const g of matching) {
+      const item = el("button", { class: "cc-cmd-item", type: "button" }, [
+        el("span", { class: "cc-run-tag" }, "any"),
+        el("span", { class: "cc-cmd-txt", text: "⚡ " + g.label }),
+        el("span", { class: "cc-cmd-meta", text: g.cat + " · runs the right command on Arista / FRR / SR Linux" }),
+      ]);
+      item.addEventListener("click", function () { selectIntent(g.intent, g.label); });
+      list.appendChild(item);
+    }
+  }
+
+  /** Select a universal intent (runs via /api/lab/intent on any node). */
+  function selectIntent(key, label) {
+    CC.mode = "intent";
+    CC.intentKey = key;
+    const input = document.getElementById("ccCmd");
+    if (input) { input.value = "⚡ " + label; input.focus(); }
+    updateTargetMeta();
   }
 
   function renderCurated(list, q) {
@@ -668,7 +701,9 @@
 
     let res;
     try {
-      if (CC.mode === "getter") {
+      if (CC.mode === "intent") {
+        res = await postJSON("/api/lab/intent", { hostname: hostname, intent: CC.intentKey });
+      } else if (CC.mode === "getter") {
         res = await postJSON("/api/lab/getter", { hostname: hostname, getter: command });
       } else {
         res = await postJSON("/api/lab/run", {
@@ -699,7 +734,13 @@
         (res.took_ms ? " · " + res.took_ms + "ms" : "");
     }
     out.appendChild(status);
-    out.appendChild(document.createTextNode("\n\n"));
+    out.appendChild(document.createTextNode("\n"));
+    // For a universal intent, show which vendor-specific command actually ran.
+    if (res.intent && res.command) {
+      out.appendChild(el("span", { class: "cc-dim" }, "⚡ " + (res.intent_label || res.intent) + " → ran: " + res.command));
+      out.appendChild(document.createTextNode("\n"));
+    }
+    out.appendChild(document.createTextNode("\n"));
     const bodyText = res.output != null && res.output !== "" ? String(res.output)
       : (res.blocked ? "(nothing executed)" : (res.ok ? "(no output)" : ""));
     if (bodyText) out.appendChild(document.createTextNode(bodyText));

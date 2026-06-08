@@ -93,6 +93,10 @@ python3 build_command_catalog.py     # writes command_catalog.json
 - `GET /api/lab/topology?fabric=clos|dcn` · `GET /api/lab/node/<hostname>`
 - `GET /api/lab/commands` (catalog) · `GET /api/lab/console/nodes` (run targets)
 - `POST /api/lab/run` `{hostname, command, allow_write}` · `POST /api/lab/getter` `{hostname, getter}`
+- `POST /api/lab/intent` `{hostname, intent}` — **universal commands**: one logical intent
+  (version/bgp/ospf/interfaces/interface_counters/routes/memory/cpu) runs the vendor-correct
+  command for the node's driver, so the same intent works on Arista / FRR / SR Linux.
+  Per-vendor command map is vendored from the driver layer in `universal_commands.py`.
 
 ## Operate
 

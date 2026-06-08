@@ -49,7 +49,7 @@ from napalm_lab import (
     napalm_matrix, lab_topology, collect_node, runner_available,
 )
 # Command Console: curated multivendor command catalog + secure live exec.
-from command_lib import catalog as cmd_catalog, run_command, run_getter
+from command_lib import catalog as cmd_catalog, run_command, run_getter, run_intent
 # NetBox helpers remain available for the (now optional) netbox-audit tool.
 from core import (
     open_device,
@@ -231,6 +231,22 @@ def api_lab_run():
     # 200 for a successful run or a deliberately-blocked (policy) command;
     # 502 when the upstream node was unreachable / docker errored.
     status = 200 if (result.get("ok") or result.get("blocked")) else 502
+    return jsonify(result), status
+
+
+@app.route("/api/lab/intent", methods=["POST"])
+def api_lab_intent():
+    """Run a logical intent (version/bgp/interfaces/…) with the vendor-correct
+    command for the node — so the same command works on every device."""
+    body = request.get_json(silent=True) or {}
+    hostname = (body.get("hostname") or "").strip()
+    intent = (body.get("intent") or "").strip()
+    if not hostname or not intent:
+        return jsonify({"error": "hostname and intent are required"}), 400
+    if hostname not in NODE_INDEX:
+        return jsonify({"error": f"unknown node: {hostname}"}), 404
+    result = run_intent(hostname, intent)
+    status = 200 if result.get("ok") else 502
     return jsonify(result), status
 
 

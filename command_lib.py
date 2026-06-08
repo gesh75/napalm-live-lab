@@ -30,6 +30,7 @@ from pathlib import Path
 
 from config import NODE_INDEX
 from napalm_lab import _docker_exec, collect_node
+from universal_commands import commands_for, intent_list, INTENTS
 
 HERE = Path(__file__).parent
 CATALOG_PATH = HERE / "command_catalog.json"
@@ -121,6 +122,8 @@ def catalog() -> dict:
         "max_cmd_len": MAX_CMD_LEN,
         "default": "read_only",
     }
+    # Universal intents: one logical command that runs on EVERY vendor.
+    cat["universal"] = intent_list()
     return cat
 
 
@@ -175,6 +178,41 @@ def run_command(hostname: str, command: str, allow_write: bool = False) -> dict:
         "error": None if ok else (err or "non-zero exit").strip()[:300],
         "took_ms": took,
     }
+
+
+def run_intent(hostname: str, intent: str) -> dict:
+    """Run a logical intent (version/bgp/interfaces/…) using the vendor-correct
+    command for the node's driver. Tries each candidate (JSON variant first, then
+    text fallback) and returns the first that succeeds — so the SAME intent works
+    on every device regardless of vendor.
+    """
+    t0 = time.time()
+    node = NODE_INDEX.get(hostname)
+    if not node:
+        return _err(hostname, intent, "unknown node (not in fabric allowlist)")
+    if intent not in INTENTS:
+        return _err(hostname, intent, f"unknown intent '{intent}'")
+    driver = node["driver"]
+    candidates = commands_for(driver, intent)
+    if not candidates:
+        return {**_err(hostname, intent, f"no '{intent}' command mapped for driver '{driver}'"),
+                "driver": driver}
+
+    last = None
+    for cmd in candidates:
+        res = run_command(hostname, cmd, allow_write=False)
+        if res.get("ok"):
+            res["intent"] = intent
+            res["intent_label"] = INTENTS[intent]["label"]
+            res["candidates_tried"] = candidates.index(cmd) + 1
+            return res
+        last = res
+    # none worked — return the last attempt, annotated
+    last = last or _err(hostname, intent, "no candidate command ran")
+    last["intent"] = intent
+    last["intent_label"] = INTENTS[intent]["label"]
+    last["took_ms"] = int((time.time() - t0) * 1000)
+    return last
 
 
 def run_getter(hostname: str, getter: str) -> dict:
