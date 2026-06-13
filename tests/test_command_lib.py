@@ -33,6 +33,15 @@ pytestmark = pytest.mark.hermetic
     ("show install pending", True),          # had 'install' substring
     ("show reboot reason", True),            # had 'reboot' substring
     ("show reload schedule", True),          # had 'reload' substring
+    # Legit pipe display filters stay read-only:
+    ("show ip route | include 10.0.0.0", True),
+    ("show run | section bgp | include neighbor", True),
+    # Pipe-to-shell escapes (P1 #7) must NOT count as read-only:
+    ("show version | bash id", False),       # EOS shell escape via pipe
+    ("show running-config | bash cat /etc/passwd", False),
+    ("show run | sh", False),
+    ("show version | python -c 'print(1)'", False),
+    ("show run | cli show running-config", False),
     ("configure terminal", False),
     ("conf t", False),
     ("no router bgp 65000", False),
@@ -64,6 +73,16 @@ def test_build_and_lib_guards_agree():
 @pytest.mark.parametrize("cmd,bad", [
     ("show version", False),
     ("show run | section bgp", False),            # pipe filter stays allowed
+    ("show ip route | include 10.0.0.0", False),  # include filter allowed
+    ("show run | section bgp | include neighbor", False),  # chained filters ok
+    # P1 #7: pipe-to-shell escapes must be rejected by _validate:
+    ("show version | bash id", True),             # EOS shell escape
+    ("show running-config | bash cat /etc/passwd", True),
+    ("show run | sh", True),
+    ("show version | python -c 'x'", True),
+    ("show run | perl -e '1'", True),
+    ("show run | cli", True),
+    ("show run |", True),                          # empty/malformed pipe segment
     ("", True),
     ("show " + "x" * 400, True),
     ("show version\nconfigure terminal", True),   # newline smuggling
@@ -84,6 +103,22 @@ def test_run_rejects_chaining_before_exec(monkeypatch):
     r = cl.run_command("leaf1", "show version; reload")
     assert r["ok"] is False and "unsafe character" in r["error"]
     assert reached["exec"] is False
+
+
+def test_run_rejects_pipe_to_shell_before_exec(monkeypatch):
+    """P1 #7: `show ... | bash <cmd>` is an EOS shell escape — must never exec."""
+    reached = {"exec": False}
+    monkeypatch.setattr(cl, "_docker_exec", lambda *a, **k: (reached.__setitem__("exec", True), (0, "", ""))[1])
+    r = cl.run_command("leaf1", "show version | bash id")
+    assert r["ok"] is False and "pipe filter" in r["error"]
+    assert reached["exec"] is False
+
+
+def test_run_allows_legit_pipe_filter(fake_exec):
+    """A real display filter still runs and passes the command through verbatim."""
+    r = cl.run_command("leaf1", "show run | section bgp")
+    assert r["ok"] is True
+    assert fake_exec["argv"][-1] == "show run | section bgp"
 
 
 # ── run_command (allowlist + wrapper + guard) ────────────────────────────────

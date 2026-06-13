@@ -55,6 +55,20 @@ READ_PREFIXES = (
 # because it is a legitimate CLI output filter, e.g. `show run | section bgp`.)
 UNSAFE_CHARS = (";", "`", ">", "<", "\n", "\r", "\x00")
 
+# The pipe '|' is allowed ONLY as a network-CLI output filter. Some NOSes
+# (notably Arista EOS) also expose shell escapes through the pipe — e.g.
+# `show running-config | bash <cmd>` runs an arbitrary shell in the container.
+# That starts with `show` (a read prefix) and contains only `|` (an allowed
+# char), so it would otherwise slip past BOTH the read-only guard and _validate.
+# We close that hole with an allowlist: every post-pipe segment MUST begin with
+# one of these known-safe display filters. Anything else (bash/sh/python/cli/…)
+# is rejected outright. Allowlist > denylist so novel escapes fail closed.
+PIPE_FILTER_KEYWORDS = frozenset({
+    "include", "exclude", "section", "begin", "count", "grep",
+    "json", "no-more", "no_more", "nomore", "match", "last", "first",
+    "redirect", "append", "display", "i", "e", "b", "linenum", "more",
+})
+
 MAX_CMD_LEN = 300
 CMD_TIMEOUT = 20
 
@@ -71,7 +85,36 @@ def is_read_only(command: str) -> bool:
     c = (command or "").strip().lower()
     if not c:
         return False
-    return c.startswith(READ_PREFIXES)
+    if not c.startswith(READ_PREFIXES):
+        return False
+    # Defense-in-depth: a piped shell escape (e.g. `show run | bash id`) starts
+    # with a read prefix but is NOT a read. Reject any non-filter pipe segment.
+    if _check_pipe_filters(c) is not None:
+        return False
+    return True
+
+
+def _check_pipe_filters(command: str) -> str | None:
+    """Validate post-pipe segments as known-safe display filters.
+
+    Returns an error string if any segment after a ``|`` is NOT a recognised
+    CLI output filter (e.g. ``bash``/``sh``/``python``/``cli`` shell escapes),
+    else None. The segment before the first pipe is the actual command and is
+    checked elsewhere (read-only guard). Empty segments (e.g. ``show run |``)
+    are rejected as malformed.
+    """
+    if "|" not in command:
+        return None
+    segments = command.split("|")
+    for seg in segments[1:]:
+        words = seg.strip().lower().split()
+        if not words:
+            return "command contains an empty pipe filter"
+        keyword = words[0]
+        if keyword not in PIPE_FILTER_KEYWORDS:
+            return (f"command contains a disallowed pipe filter ('{keyword}'); "
+                    "only display filters (include/exclude/section/…) are allowed")
+    return None
 
 
 def _validate(command: str) -> str | None:
@@ -84,6 +127,9 @@ def _validate(command: str) -> str | None:
     if bad is not None:
         label = {"\n": "newline", "\r": "carriage-return", "\x00": "null"}.get(bad, repr(bad))
         return f"command contains an unsafe character ({label})"
+    pipe_err = _check_pipe_filters(command)
+    if pipe_err is not None:
+        return pipe_err
     return None
 
 

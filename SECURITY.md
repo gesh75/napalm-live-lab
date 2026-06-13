@@ -12,6 +12,7 @@ notes below describe the security model and how to harden it if you expose it.
 | **Target allowlist** | `command_lib.run_command` rejects any hostname not in `config.NODE_INDEX`. Arbitrary container names can never reach `docker exec`. |
 | **Read-only by default** | Only operational commands (`show`/`display`/`get`/`ping`/…) run by default. Mutating verbs (`configure`, `no`, `delete`, `commit`, `write`, `reload`, `clear`, …) are blocked unless write mode is explicitly enabled. |
 | **No command smuggling** | Commands containing newlines or control characters are rejected, so a second command cannot be appended past the read-only check. Commands are length-capped. |
+| **Pipe-filter allowlist** | The `\|` operator is permitted only as a network-CLI **output filter**. Every post-pipe segment must begin with a known-safe filter keyword (`include`/`exclude`/`section`/`begin`/`count`/`grep`/`json`/…). Shell escapes such as `show run \| bash <cmd>` (an Arista EOS pipe-to-shell) are rejected before exec — they cannot ride a `show …` prefix past the read-only guard. |
 | **Hard read-only switch** | Set `LAB_CONSOLE_READONLY=1` to disable write mode entirely, regardless of the UI toggle. Recommended for any shared/exposed deployment. |
 | **No hardcoded secrets** | NetBox URL/token and all device credentials are read from environment variables. The repository contains no real secrets. |
 
