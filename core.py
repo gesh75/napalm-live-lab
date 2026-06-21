@@ -16,6 +16,13 @@ urllib3.disable_warnings()
 
 from config import SSH_USER, SSH_KEY, SSH_TIMEOUT, NETBOX_URL, NETBOX_TOKEN, ZTASID
 
+# TLS certificate verification for NetBox HTTPS requests.
+# Secure by default; opt out ONLY for trusted internal hosts with self-signed
+# certs by setting NETBOX_TLS_VERIFY=0 (or false/no) in the environment.
+NETBOX_TLS_VERIFY = os.environ.get("NETBOX_TLS_VERIFY", "1").strip().lower() not in (
+    "0", "false", "no", "off", "",
+)
+
 
 # ── NAPALM device connection ───────────────────────────────────────────────────
 
@@ -129,7 +136,7 @@ def nb_get(path: str, params: dict = None) -> list:
     url = f"{NETBOX_URL}/api/{path}"
     results = []
     while url:
-        r = requests.get(url, headers=_nb_headers(), params=params, verify=False, timeout=15)
+        r = requests.get(url, headers=_nb_headers(), params=params, verify=NETBOX_TLS_VERIFY, timeout=15)
         if r.status_code == 401:
             raise PermissionError(
                 "NetBox returned 401 — session cookie has expired.\n"

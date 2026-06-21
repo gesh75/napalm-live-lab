@@ -409,9 +409,9 @@ function renderVersionAudit(data) {
             html += `<div class="alert-item alert-warning">
                 <span class="alert-icon">⚠️</span>
                 <span class="alert-text">
-                    <strong>${m.model}</strong> (${m.driver}) has ${m.versions.length} different versions:
-                    ${m.versions.map(v => `<span class="badge badge-warn">${v}</span>`).join(" ")}
-                    <br><small style="color:var(--text-muted)">${m.devices.join(", ")}</small>
+                    <strong>${escapeHtml(m.model)}</strong> (${escapeHtml(m.driver)}) has ${m.versions.length} different versions:
+                    ${m.versions.map(v => `<span class="badge badge-warn">${escapeHtml(v)}</span>`).join(" ")}
+                    <br><small style="color:var(--text-muted)">${escapeHtml(m.devices.join(", "))}</small>
                 </span>
             </div>`;
         }
@@ -425,13 +425,13 @@ function renderVersionAudit(data) {
             ? `<span class="badge badge-error">Error</span>`
             : `<span class="badge badge-ok">OK</span>`;
         html += `<tr>
-            <td>${d.site}</td>
-            <td class="mono">${d.hostname}</td>
-            <td class="mono">${d.ip}</td>
-            <td>${d.vendor}</td>
-            <td>${d.model}</td>
-            <td class="mono">${d.os_version}</td>
-            <td class="mono">${d.serial}</td>
+            <td>${escapeHtml(d.site)}</td>
+            <td class="mono">${escapeHtml(d.hostname)}</td>
+            <td class="mono">${escapeHtml(d.ip)}</td>
+            <td>${escapeHtml(d.vendor)}</td>
+            <td>${escapeHtml(d.model)}</td>
+            <td class="mono">${escapeHtml(d.os_version)}</td>
+            <td class="mono">${escapeHtml(d.serial)}</td>
             <td>${formatUptime(d.uptime)}</td>
             <td>${status}</td>
         </tr>`;
@@ -468,9 +468,9 @@ function renderBgpStatus(data) {
             html += `<div class="alert-item alert-critical">
                 <span class="alert-icon">❌</span>
                 <span class="alert-text">
-                    <span class="alert-host">${p.hostname}</span>
-                    Peer <strong class="mono">${p.peer_ip}</strong>
-                    ${p.description ? `(${p.description})` : ""} — VRF: ${p.vrf}
+                    <span class="alert-host">${escapeHtml(p.hostname)}</span>
+                    Peer <strong class="mono">${escapeHtml(p.peer_ip)}</strong>
+                    ${p.description ? `(${escapeHtml(p.description)})` : ""} — VRF: ${escapeHtml(p.vrf)}
                 </span>
             </div>`;
         }
@@ -479,19 +479,19 @@ function renderBgpStatus(data) {
 
     for (const dev of data.devices) {
         if (dev.error) {
-            html += `<div class="card"><div class="card-title">${dev.hostname} — <span class="badge badge-error">Error: ${dev.error}</span></div></div>`;
+            html += `<div class="card"><div class="card-title">${escapeHtml(dev.hostname)} — <span class="badge badge-error">Error: ${escapeHtml(dev.error)}</span></div></div>`;
             continue;
         }
         if (!dev.peers.length) continue;
 
-        html += `<div class="card"><div class="card-title">${dev.hostname} — ${dev.peers.length} peers (${dev.up} up, ${dev.down} down)</div>
+        html += `<div class="card"><div class="card-title">${escapeHtml(dev.hostname)} — ${dev.peers.length} peers (${dev.up} up, ${dev.down} down)</div>
         <table><tr><th>Peer IP</th><th>VRF</th><th>State</th><th>Description</th><th>Uptime</th><th>Rcvd</th><th>Sent</th></tr>`;
         for (const p of dev.peers) {
             const badge = p.is_up ? '<span class="badge badge-up">UP</span>' : '<span class="badge badge-down">DOWN</span>';
             html += `<tr>
-                <td class="mono">${p.peer_ip}</td><td>${p.vrf}</td><td>${badge}</td>
-                <td>${p.description || "-"}</td><td>${formatUptime(p.uptime)}</td>
-                <td>${p.received}</td><td>${p.sent}</td>
+                <td class="mono">${escapeHtml(p.peer_ip)}</td><td>${escapeHtml(p.vrf)}</td><td>${badge}</td>
+                <td>${p.description ? escapeHtml(p.description) : "-"}</td><td>${formatUptime(p.uptime)}</td>
+                <td>${escapeHtml(p.received)}</td><td>${escapeHtml(p.sent)}</td>
             </tr>`;
         }
         html += `</table></div>`;
@@ -522,7 +522,7 @@ function renderNetboxAudit(data) {
         for (const p of data.live_only) {
             html += `<div class="alert-item alert-critical">
                 <span class="alert-icon">⚠️</span>
-                <span class="alert-text"><span class="mono">${p}</span> — Active on devices but <strong>not documented</strong> in NetBox</span>
+                <span class="alert-text"><span class="mono">${escapeHtml(p)}</span> — Active on devices but <strong>not documented</strong> in NetBox</span>
             </div>`;
         }
         html += `</div>`;
@@ -533,7 +533,7 @@ function renderNetboxAudit(data) {
         for (const p of data.netbox_only) {
             html += `<div class="alert-item alert-warning">
                 <span class="alert-icon">📋</span>
-                <span class="alert-text"><span class="mono">${p}</span> — In NetBox but not seen on any live interface</span>
+                <span class="alert-text"><span class="mono">${escapeHtml(p)}</span> — In NetBox but not seen on any live interface</span>
             </div>`;
         }
         html += `</div>`;
@@ -542,16 +542,16 @@ function renderNetboxAudit(data) {
     html += `<div class="card"><div class="card-title">✅ Matched Prefixes (${data.matched.length})</div>
         <table><tr><th>Prefix</th></tr>`;
     for (const p of data.matched) {
-        html += `<tr><td class="mono">${p}</td></tr>`;
+        html += `<tr><td class="mono">${escapeHtml(p)}</td></tr>`;
     }
     html += `</table></div>`;
 
     html += `<div class="card"><div class="card-title">📋 Device Summary</div><table>
         <tr><th>Device</th><th>IP</th><th>Driver</th><th>Model</th><th>Interfaces</th><th>IPs</th><th>Status</th></tr>`;
     for (const d of data.devices) {
-        const status = d.error ? `<span class="badge badge-error">${d.error}</span>` : `<span class="badge badge-ok">OK</span>`;
-        html += `<tr><td class="mono">${d.hostname}</td><td class="mono">${d.ip}</td><td>${d.driver}</td>
-            <td>${d.model}</td><td>${d.interfaces}</td><td>${d.ips}</td><td>${status}</td></tr>`;
+        const status = d.error ? `<span class="badge badge-error">${escapeHtml(d.error)}</span>` : `<span class="badge badge-ok">OK</span>`;
+        html += `<tr><td class="mono">${escapeHtml(d.hostname)}</td><td class="mono">${escapeHtml(d.ip)}</td><td>${escapeHtml(d.driver)}</td>
+            <td>${escapeHtml(d.model)}</td><td>${escapeHtml(d.interfaces)}</td><td>${escapeHtml(d.ips)}</td><td>${status}</td></tr>`;
     }
     html += `</table></div>`;
     ra.innerHTML = html;
@@ -584,8 +584,8 @@ function renderEnvHealth(data) {
             html += `<div class="alert-item ${cls}">
                 <span class="alert-icon">${icon}</span>
                 <span class="alert-text">
-                    <span class="alert-host">${a.hostname}</span>
-                    ${a.type.toUpperCase()}: ${a.sensor} = <strong>${a.value}</strong>
+                    <span class="alert-host">${escapeHtml(a.hostname)}</span>
+                    ${escapeHtml(a.type).toUpperCase()}: ${escapeHtml(a.sensor)} = <strong>${escapeHtml(a.value)}</strong>
                 </span>
             </div>`;
         }
@@ -596,13 +596,13 @@ function renderEnvHealth(data) {
         <tr><th>Device</th><th>Model</th><th>CPU %</th><th>Memory %</th><th>Fans</th><th>Power</th><th>Temp Alerts</th><th>Uptime</th></tr>`;
     for (const d of data.devices) {
         if (d.error) {
-            html += `<tr><td class="mono">${d.hostname}</td><td colspan="7"><span class="badge badge-error">${d.error}</span></td></tr>`;
+            html += `<tr><td class="mono">${escapeHtml(d.hostname)}</td><td colspan="7"><span class="badge badge-error">${escapeHtml(d.error)}</span></td></tr>`;
             continue;
         }
         const cpuBadge = d.cpu_pct > 80 ? "badge-error" : d.cpu_pct > 60 ? "badge-warn" : "badge-ok";
         const memBadge = d.memory_pct > 85 ? "badge-error" : d.memory_pct > 70 ? "badge-warn" : "badge-ok";
         html += `<tr>
-            <td class="mono">${d.hostname}</td><td>${d.model}</td>
+            <td class="mono">${escapeHtml(d.hostname)}</td><td>${escapeHtml(d.model)}</td>
             <td><span class="badge ${cpuBadge}">${d.cpu_pct}%</span></td>
             <td><span class="badge ${memBadge}">${d.memory_pct}%</span></td>
             <td>${d.fans_ok ? '<span class="badge badge-ok">OK</span>' : '<span class="badge badge-error">FAIL</span>'}</td>
@@ -642,8 +642,8 @@ function renderInterfaceErrors(data) {
         const state = e.is_up ? '<span class="badge badge-up">UP</span>' : '<span class="badge badge-down">DOWN</span>';
         const severity = e.total > 10000 ? "badge-error" : e.total > 1000 ? "badge-warn" : "badge-info";
         html += `<tr>
-            <td class="mono">${e.hostname}</td><td class="mono">${e.interface}</td>
-            <td>${e.description || "-"}</td><td>${state}</td><td>${e.speed || "-"}</td>
+            <td class="mono">${escapeHtml(e.hostname)}</td><td class="mono">${escapeHtml(e.interface)}</td>
+            <td>${e.description ? escapeHtml(e.description) : "-"}</td><td>${state}</td><td>${e.speed ? escapeHtml(e.speed) : "-"}</td>
             <td>${fmtNum(e.rx_errors)}</td><td>${fmtNum(e.tx_errors)}</td>
             <td>${fmtNum(e.rx_discards)}</td><td>${fmtNum(e.tx_discards)}</td>
             <td><span class="badge ${severity}">${fmtNum(e.total)}</span></td>
@@ -669,9 +669,9 @@ function renderLldpTopology(data) {
         <tr><th>Source Device</th><th>Source Port</th><th>→</th><th>Target Device</th><th>Target Port</th></tr>`;
     for (const l of data.links) {
         html += `<tr>
-            <td class="mono">${l.source}</td><td class="mono">${l.source_port}</td>
+            <td class="mono">${escapeHtml(l.source)}</td><td class="mono">${escapeHtml(l.source_port)}</td>
             <td style="color:var(--accent-cyan)">→</td>
-            <td class="mono">${l.target}</td><td class="mono">${l.target_port}</td>
+            <td class="mono">${escapeHtml(l.target)}</td><td class="mono">${escapeHtml(l.target_port)}</td>
         </tr>`;
     }
     html += `</table></div>`;
@@ -687,14 +687,14 @@ function renderLldpTopology(data) {
     for (const node of data.nodes) {
         const links = nodeLinks[node] || [];
         html += `<div class="topo-node">
-            <div class="topo-node-title">${node}</div>`;
+            <div class="topo-node-title">${escapeHtml(node)}</div>`;
         if (links.length) {
             for (const l of links) {
                 html += `<div class="topo-link">
-                    <span class="topo-port">${l.source_port}</span>
+                    <span class="topo-port">${escapeHtml(l.source_port)}</span>
                     <span style="color:var(--text-muted)">→</span>
-                    <span>${l.target}</span>
-                    <span class="topo-port">${l.target_port}</span>
+                    <span>${escapeHtml(l.target)}</span>
+                    <span class="topo-port">${escapeHtml(l.target_port)}</span>
                 </div>`;
             }
         } else {
@@ -716,16 +716,16 @@ function renderSiteCollect(data) {
         </div>
         <div class="alert-item alert-info">
             <span class="alert-icon">📁</span>
-            <span class="alert-text">Saved to: <strong class="mono">${data.output_file}</strong></span>
+            <span class="alert-text">Saved to: <strong class="mono">${escapeHtml(data.output_file)}</strong></span>
         </div>
         <div class="card"><div class="card-title">📊 Collection Summary</div><table>
         <tr><th>Device</th><th>Model</th><th>Version</th><th>Interfaces</th><th>IPs</th><th>LLDP</th><th>ARP</th><th>Status</th></tr>
     `;
     for (const d of data.devices) {
-        const status = d.error ? `<span class="badge badge-error">${d.error}</span>` : `<span class="badge badge-ok">OK</span>`;
+        const status = d.error ? `<span class="badge badge-error">${escapeHtml(d.error)}</span>` : `<span class="badge badge-ok">OK</span>`;
         html += `<tr>
-            <td class="mono">${d.hostname}</td><td>${d.model}</td><td class="mono">${d.version}</td>
-            <td>${d.interfaces}</td><td>${d.ips}</td><td>${d.lldp_neighbors}</td><td>${d.arp_entries}</td>
+            <td class="mono">${escapeHtml(d.hostname)}</td><td>${escapeHtml(d.model)}</td><td class="mono">${escapeHtml(d.version)}</td>
+            <td>${escapeHtml(d.interfaces)}</td><td>${escapeHtml(d.ips)}</td><td>${escapeHtml(d.lldp_neighbors)}</td><td>${escapeHtml(d.arp_entries)}</td>
             <td>${status}</td>
         </tr>`;
     }
@@ -741,8 +741,8 @@ function renderSnapshotResult(data) {
         <div class="alert-item alert-info">
             <span class="alert-icon">📸</span>
             <span class="alert-text">
-                <strong>${data.label.toUpperCase()}</strong> snapshot saved:
-                <strong class="mono">${data.file}</strong>
+                <strong>${escapeHtml(data.label).toUpperCase()}</strong> snapshot saved:
+                <strong class="mono">${escapeHtml(data.file)}</strong>
                 (${data.devices} devices)
             </span>
         </div>
@@ -768,7 +768,7 @@ function renderDiffResult(data) {
         return;
     }
 
-    html += `<div class="card"><div class="card-title">🔍 Changes (${data.file_a} → ${data.file_b})</div>`;
+    html += `<div class="card"><div class="card-title">🔍 Changes (${escapeHtml(data.file_a)} → ${escapeHtml(data.file_b)})</div>`;
     for (const c of data.changes) {
         const cls = c.type.includes("removed") ? "diff-remove"
             : c.type.includes("added") ? "diff-add" : "diff-change";
@@ -776,10 +776,10 @@ function renderDiffResult(data) {
             : c.type.includes("added") ? "➕" : "🔄";
         html += `<div class="diff-item ${cls}">
             <span>${icon}</span>
-            <span class="alert-host">${c.hostname}</span>
-            <span class="badge badge-info">${c.type}</span>
-            ${c.interface ? `<span class="mono">${c.interface}</span>` : ""}
-            <span>${c.details}</span>
+            <span class="alert-host">${escapeHtml(c.hostname)}</span>
+            <span class="badge badge-info">${escapeHtml(c.type)}</span>
+            ${c.interface ? `<span class="mono">${escapeHtml(c.interface)}</span>` : ""}
+            <span>${escapeHtml(c.details)}</span>
         </div>`;
     }
     html += `</div>`;
@@ -798,8 +798,8 @@ async function updateRecentJobs() {
         el.innerHTML = jobs.slice(-5).reverse().map(j => {
             const icon = j.status === "done" ? "✅" : j.status === "error" ? "❌" : "⏳";
             return `<div style="padding: 4px 0; border-bottom: 1px solid var(--border);">
-                ${icon} <strong>${j.type}</strong> ${j.site.toUpperCase()}<br>
-                <small style="color:var(--text-muted)">${j.message}</small>
+                ${icon} <strong>${escapeHtml(j.type)}</strong> ${escapeHtml(String(j.site || "").toUpperCase())}<br>
+                <small style="color:var(--text-muted)">${escapeHtml(j.message)}</small>
             </div>`;
         }).join("");
     } catch (e) {}
@@ -808,7 +808,9 @@ async function updateRecentJobs() {
 // ── Utilities ──────────────────────────────────────────────────────────────
 
 function escapeHtml(s) {
-    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    if (s === null || s === undefined) return "";
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
 
 function formatUptime(seconds) {
