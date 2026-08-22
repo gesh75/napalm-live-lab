@@ -42,6 +42,10 @@ pytestmark = pytest.mark.hermetic
     ("show run | sh", False),
     ("show version | python -c 'print(1)'", False),
     ("show run | cli show running-config", False),
+    ("show running-config | redirect flash:startup-config", False),
+    ("show run | append flash:foo", False),
+    ("monitor session 1 source Ethernet1", False),
+    ("gettext foo", False),
     ("configure terminal", False),
     ("conf t", False),
     ("no router bgp 65000", False),
@@ -66,8 +70,12 @@ def test_read_prefixes_are_network_only():
 
 def test_build_and_lib_guards_agree():
     """The catalog builder and runtime must classify identically."""
-    for c in ["show version", "configure terminal", "no shutdown", "ping 1.1.1.1"]:
-        assert bcc.is_read_only(c) == cl.is_read_only(c)
+    for c in [
+        "show version", "configure terminal", "no shutdown", "ping 1.1.1.1",
+        "show version | bash id", "show run | redirect flash:foo",
+        "show run | include bgp", "monitor session 1",
+    ]:
+        assert bcc.is_read_only(c) == cl.is_read_only(c), c
 
 
 @pytest.mark.parametrize("cmd,bad", [
@@ -83,6 +91,8 @@ def test_build_and_lib_guards_agree():
     ("show run | perl -e '1'", True),
     ("show run | cli", True),
     ("show run |", True),                          # empty/malformed pipe segment
+    ("show running-config | redirect flash:foo", True),
+    ("show run | append flash:foo", True),
     ("", True),
     ("show " + "x" * 400, True),
     ("show version\nconfigure terminal", True),   # newline smuggling
@@ -220,3 +230,14 @@ def test_catalog_has_no_multiline_commands():
     """Library must be single-line operational commands (no smuggling vectors)."""
     for c in cl.load_catalog().get("library", []):
         assert "\n" not in c["cmd"]
+
+
+def test_run_blocks_cisco_only_on_frr(fake_exec):
+    r = cl.run_command("spine3", "show vtp status")
+    assert r["ok"] is False and r.get("blocked") is True
+    assert "Cisco IOS-only" in r["error"]
+
+
+def test_gettext_is_not_a_read():
+    assert cl.is_read_only("gettext foo") is False
+    assert cl.is_read_only("getting interfaces") is False

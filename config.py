@@ -45,6 +45,7 @@ NAPALM_SUPPORT = {
 STANDARD_GETTERS = [
     "get_facts", "get_interfaces", "get_interfaces_ip",
     "get_bgp_neighbors", "get_lldp_neighbors", "get_environment",
+    "get_arp_table", "get_mac_address_table", "get_network_instances",
 ]
 
 # ── LIVE LAB FABRICS ────────────────────────────────────────────────────────────

@@ -6,7 +6,7 @@
 [![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![NAPALM](https://img.shields.io/badge/NAPALM-4.1%2B-2C8EBB)](https://napalm.readthedocs.io/)
 [![containerlab](https://img.shields.io/badge/containerlab-multivendor-0E7FC0?logo=docker&logoColor=white)](https://containerlab.dev/)
-[![tests](https://img.shields.io/badge/tests-107%20passing-3FB950?logo=pytest&logoColor=white)](#tests)
+[![tests](https://img.shields.io/badge/tests-hermetic-3FB950?logo=pytest&logoColor=white)](#tests)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 ---
@@ -222,10 +222,10 @@ verb** — the rule is positive (allowlist of read verbs), not a blocklist of
 write verbs, which is why legitimate reads like `show commit history` or
 `show reboot reason` are never false-blocked:
 
-- **Allowed read prefixes:** `show`, `display`, `get`, `ping`, `traceroute`, `monitor`, `info` (network-CLI verbs only — no Unix `ls`/`cat`/`file`).
-- **Blocked:** anything that does **not** start with a read prefix — `configure`, `conf t`, `no …`, `delete`, `set …`, `commit`, `write`/`wr`, `reload`, `clear …`, `reboot`, etc.
+- **Allowed read prefixes:** first token in `show`, `display`, `get`, `ping`, `traceroute`, `info` (network-CLI verbs only — no Unix `ls`/`cat`/`file`, and no EOS `monitor session` SPAN config).
+- **Blocked:** anything that does **not** start with a read prefix — `configure`, `conf t`, `no …`, `delete`, `set …`, `commit`, `write`/`wr`, `reload`, `clear …`, `reboot`, `monitor session`, etc.
 - Shell/redirect metacharacters (`;`, `` ` ``, `>`, `<`) and newlines are rejected outright, so a second command can't be smuggled past the guard.
-- A write command runs **only** if the caller opts in *and* the deployment allows write mode.
+- Pipe filters are an allowlist of *display* filters (`include`/`exclude`/`section`/`json`/…). `redirect` and `append` are writes and are rejected. `show run | bash` is rejected.
 
 ### The `LAB_CONSOLE_READONLY` switch
 
@@ -281,7 +281,8 @@ curl -s "http://127.0.0.1:5959/api/test/runs/$RID/export?format=junit"
 ## Quickstart
 
 ```bash
-cd 04_Scripts_Tools/napalm_network
+git clone https://github.com/gesh75/napalm-live-lab.git
+cd napalm-live-lab
 
 # 1. Virtual environment + dependencies
 python3 -m venv venv
@@ -321,10 +322,10 @@ The dashboard reads live state from two containerlab topologies plus the `napalm
 
 ```bash
 # CLOS-EVPN spine/leaf (Arista cEOS / Nokia SR Linux / FRR)
-sudo containerlab deploy -t clos-evpn.clab.yml      # containers: clab-clos-evpn-*
+sudo containerlab deploy -t topologies/clos-evpn.clab.yml      # containers: clab-clos-evpn-*
 
 # 3-Tier FRR network (core / edge / dist)
-sudo containerlab deploy -t dcn-3tier.clab.yml      # containers: de-fra-core-01, …
+sudo containerlab deploy -t topologies/dcn-3tier.clab.yml      # containers: de-fra-core-01, …
 
 # napalm-runner sidecar — attached to clos-mgmt + dcn-lab management networks,
 # runs the real NAPALM drivers (eos, srl) from inside the fabric.
@@ -348,7 +349,7 @@ The console ships publicly, so it defaults safe. The model (implemented in `comm
 - **No second-command smuggling.** Newlines and control characters (`\n`, `\r`, `\x00`) are rejected, and commands are length-capped — you cannot sneak a second command past the read-only check.
 - **Hard kill switch.** `LAB_CONSOLE_READONLY=1` disables write mode for any exposed deployment; the console binds to localhost by default.
 - **No secrets in the repo.** Lab credentials (`admin`/`admin`, `NokiaSrl1!`) are **well-known containerlab defaults for a local sandbox** and are env-overridable. NetBox `NETBOX_URL`/`NETBOX_TOKEN` are **env-only** — never hardcoded. The 2,361-command catalog is built from a private corpus that never ships.
-- **XSS-safe UI.** The vanilla-JS frontend renders all device output via `textContent`, never `innerHTML`.
+- **XSS-safe Live Lab UI.** The vanilla-JS `/lab` console renders device output via `textContent`, never `innerHTML`. The legacy `/classic` dashboard is being migrated off `innerHTML`.
 
 See [`SECURITY.md`](./SECURITY.md) for the full policy.
 
@@ -369,11 +370,11 @@ See [`SECURITY.md`](./SECURITY.md) for the full policy.
 
 ## Tests
 
-107 hermetic pytest tests (no live fabric required) cover the collector, the catalog loader, and the read-only/security guard.
+Hermetic pytest tests (no live fabric required) cover the collector, the catalog loader, the read-only/security guard, and the test platform.
 
 ```bash
 source venv/bin/activate
-pytest tests/ -q          # 107 passed
+pytest tests/ -q
 ```
 
 ---
@@ -396,7 +397,7 @@ pytest tests/ -q          # 107 passed
 | `lab.html` / `lab.js` / `lab.css` | The `/lab` UI incl. the Command Console (vanilla JS, `textContent` only → XSS-safe). |
 | `lab_runner/collect.py` | Real NAPALM runner (runs inside the `napalm-runner` sidecar). |
 | `core.py` | Legacy NetBox helpers (`NETBOX_URL`/`NETBOX_TOKEN` are env-only). |
-| `tests/` | 107 hermetic tests (pytest), all passing. |
+| `tests/` | Hermetic pytest suite (no live fabric). |
 | `LICENSE` | MIT. |
 
 ---

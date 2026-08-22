@@ -15,6 +15,8 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from datetime import datetime
 
+import uuid
+
 from checks import CheckResult, evaluate_check, resolve_targets
 from command_lib import run_command, run_intent
 from config import NODE_INDEX
@@ -23,7 +25,7 @@ from results import SuiteRun
 
 
 def _new_run_id() -> str:
-    return "run_" + datetime.now().strftime("%Y%m%d_%H%M%S_") + f"{int(time.time()*1000) % 1000:03d}"
+    return "run_" + uuid.uuid4().hex[:12]
 
 
 def run_suite(suite, fabric_filter: str | None = None, max_workers: int = 8) -> SuiteRun:

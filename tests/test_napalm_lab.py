@@ -213,6 +213,10 @@ def make_fake_docker_exec(reachable_frr_containers=None):
             v = {"version": "4.33.1F", "modelName": "cEOS", "serialNumber": "ABC", "uptime": 42}
             return 0, json.dumps(v), ""
 
+        # ── SRL exec fallback via sr_cli ──
+        if argv[:1] == ["sr_cli"]:
+            return 0, "Hostname : spine1\nSoftware Version : v24.7.2\n", ""
+
         return 1, "", f"unhandled exec: {container} {joined}"
 
     return fake
@@ -263,13 +267,14 @@ class TestCollectNodeHermetic:
         assert r["getters"]["get_lldp_neighbors"]["ok"] is False
         assert r["getters"]["get_environment"]["ok"] is False
 
-    def test_srl_runner_failure_surfaces_unreachable(self, patch_docker):
-        # srl has no eos exec fallback, so a failed runner stays unreachable.
+    def test_srl_falls_back_to_exec_when_runner_down(self, patch_docker):
+        # srl JSON-RPC fails in the default fake; sr_cli exec fallback keeps the node reachable.
         r = napalm_lab.collect_node("spine1")  # nokia / srl
         assert r["driver"] == "srl"
         assert r["napalm_supported"] is True
-        assert r["reachable"] is False
-        assert r["error"], "failed srl runner should carry an error string"
+        assert r["reachable"] is True
+        assert r["method"] == "exec"
+        assert r["getters"]["get_facts"]["ok"] is True
 
     def test_eos_falls_back_to_exec_when_runner_down(self, monkeypatch):
         # Runner fails for eos too -> _ceos_exec_fallback kicks in via `Cli`.
@@ -332,12 +337,12 @@ class TestMatrixMath:
             assert 0 <= gs["ok"] <= gs["total"]
 
     def test_matrix_native_vs_fallback_split(self, patch_docker):
-        # default fake: 3 eos via runner (napalm), 13 frr via exec, srl(3) unreachable.
+        # default fake: 3 eos via runner (napalm), 13 frr via exec, 3 srl via sr_cli fallback.
         m = napalm_lab.napalm_matrix("all")
         s = m["summary"]
         assert s["napalm_native"] == 3, "only the 3 eos nodes go native in the default fake"
-        assert s["exec_fallback"] == 13, "13 FRR nodes use exec fallback"
-        assert s["reachable"] == 16, "16 reachable (3 eos + 13 frr); srl down"
+        assert s["exec_fallback"] == 16, "13 FRR + 3 SRL exec fallback"
+        assert s["reachable"] == 19, "all 19 reachable (srl now has exec fallback)"
 
     def test_matrix_clos_only(self, patch_docker):
         m = napalm_lab.napalm_matrix("clos")

@@ -1,0 +1,64 @@
+name: clos-evpn
+prefix: ""
+mgmt:
+  network: clos-mgmt
+  ipv4-subnet: 172.20.20.0/24
+
+topology:
+  kinds:
+    ceos:
+      image: ceos:4.33.1F
+    nokia_srlinux:
+      image: ghcr.io/nokia/srlinux:24.7.2
+      type: ixrd3l
+    linux:
+      image: quay.io/frrouting/frr:10.1.1
+
+  nodes:
+    spine1:
+      kind: nokia_srlinux
+      mgmt-ipv4: 172.20.20.11
+    spine2:
+      kind: ceos
+      mgmt-ipv4: 172.20.20.12
+    spine3:
+      kind: linux
+      mgmt-ipv4: 172.20.20.13
+    leaf1:
+      kind: ceos
+      mgmt-ipv4: 172.20.20.21
+    leaf2:
+      kind: nokia_srlinux
+      mgmt-ipv4: 172.20.20.22
+    leaf3:
+      kind: linux
+      mgmt-ipv4: 172.20.20.23
+    leaf4:
+      kind: ceos
+      mgmt-ipv4: 172.20.20.24
+    leaf5:
+      kind: nokia_srlinux
+      mgmt-ipv4: 172.20.20.25
+    leaf6:
+      kind: linux
+      mgmt-ipv4: 172.20.20.26
+
+  links:
+    - endpoints: ["spine1:e1-1", "leaf1:eth1"]
+    - endpoints: ["spine1:e1-2", "leaf2:e1-1"]
+    - endpoints: ["spine1:e1-3", "leaf3:eth1"]
+    - endpoints: ["spine1:e1-4", "leaf4:eth1"]
+    - endpoints: ["spine1:e1-5", "leaf5:e1-1"]
+    - endpoints: ["spine1:e1-6", "leaf6:eth1"]
+    - endpoints: ["spine2:eth1", "leaf1:eth2"]
+    - endpoints: ["spine2:eth2", "leaf2:e1-2"]
+    - endpoints: ["spine2:eth3", "leaf3:eth2"]
+    - endpoints: ["spine2:eth4", "leaf4:eth2"]
+    - endpoints: ["spine2:eth5", "leaf5:e1-2"]
+    - endpoints: ["spine2:eth6", "leaf6:eth2"]
+    - endpoints: ["spine3:eth1", "leaf1:eth3"]
+    - endpoints: ["spine3:eth2", "leaf2:e1-3"]
+    - endpoints: ["spine3:eth3", "leaf3:eth3"]
+    - endpoints: ["spine3:eth4", "leaf4:eth3"]
+    - endpoints: ["spine3:eth5", "leaf5:e1-3"]
+    - endpoints: ["spine3:eth6", "leaf6:eth3"]

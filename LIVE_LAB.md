@@ -39,7 +39,7 @@ dashboard (:5959, host)
 | `napalm_lab.py` | Collection backend: runner dispatch (eos/srl) + vtysh (frr), matrix, topology, legacy shims |
 | `command_lib.py` | Command Console backend: catalog loader + `run_command`/`run_getter` with read-only guard |
 | `build_command_catalog.py` | Builds `command_catalog.json` from the private CLI corpus (corpus is **not** shipped) |
-| `command_catalog.json` | 2,381 curated single-line operational commands (public-safe; browsed + run by the console) |
+| `command_catalog.json` | 2,361 curated single-line operational commands (public-safe; browsed + run by the console) |
 | `lab.html` / `lab.js` / `lab.css` | The `/lab` UI (GitHub-dark, matrix + SVG topology + Command Console, auto-refresh 15s) |
 | `lab_runner/` | `Dockerfile` + `collect.py` (real NAPALM) + `up.sh` (build & attach) + README |
 | `tests/test_napalm_lab.py` | 28 hermetic tests (config/security, mapping, backend, matrix math, topology) |
@@ -48,7 +48,7 @@ dashboard (:5959, host)
 ## Command Console — run a multivendor command library against the live lab
 
 The `/lab` page includes a **Command Console**: a curated, searchable library of
-**2,381 single-line operational commands** distilled from a private multivendor CLI
+**2,361 single-line operational commands** distilled from a private multivendor CLI
 corpus (Arista / Cisco / Juniper), plus per-vendor curated quick-commands and the
 NAPALM getters. Pick a node, pick (or type) a command, and run it live.
 

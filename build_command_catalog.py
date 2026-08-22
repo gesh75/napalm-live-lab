@@ -38,7 +38,7 @@ OUT = HERE / "command_catalog.json"
 # Read-only operational prefixes (network-CLI verbs only). Must stay in sync
 # with command_lib.READ_PREFIXES — both are unit-tested for agreement.
 READ_PREFIXES = (
-    "show", "display", "get", "ping", "traceroute", "monitor", "info",
+    "show", "display", "get", "ping", "traceroute", "info",
 )
 
 # ── Curated, known-good operational commands per lab vendor ──────────────────
@@ -135,13 +135,26 @@ def classify(cmd: str) -> str:
 def is_read_only(command: str) -> bool:
     """True if a single command only reads state (safe to run by default).
 
-    Mirrors command_lib.is_read_only — kept in sync; both are unit-tested.
-    A command that starts with an operational verb is a read.
+    Mirrors command_lib.is_read_only — first token must be a read verb.
     """
     c = (command or "").strip().lower()
     if not c:
         return False
-    return c.startswith(READ_PREFIXES)
+    first = c.split()[0] if c.split() else ""
+    if first not in READ_PREFIXES:
+        return False
+    # Keep builder/runtime in agreement on pipe-to-shell / write filters.
+    if "|" in c:
+        allowed = {
+            "include", "exclude", "section", "begin", "count", "grep",
+            "json", "no-more", "no_more", "nomore", "match", "last", "first",
+            "display", "i", "e", "b", "linenum", "more",
+        }
+        for seg in c.split("|")[1:]:
+            words = seg.strip().split()
+            if not words or words[0] not in allowed:
+                return False
+    return True
 
 
 VENDOR_KEY = {"arista": "arista", "cisco": "cisco", "juniper": "juniper",
@@ -174,8 +187,9 @@ def build(corpus_path: Path) -> dict:
         runnable_on = []
         if vk == "arista":
             runnable_on = ["arista"]          # runs on cEOS
-        elif vk == "cisco" and kind == "show":
-            runnable_on = ["frr"]             # FRR mimics Cisco show
+        # Cisco/Juniper catalog entries are reference-only. FRR is Cisco-like
+        # for a *small* subset of show commands; tagging all 311 Cisco IOS
+        # verbs (VTP, spanning-tree, EtherChannel) as runnable_on FRR was a lie.
         library.append({
             "id": len(library),
             "vendor": vendor,

@@ -58,15 +58,20 @@ from checks import CheckResult, evaluate_check, resolve_targets
 from checks_builtin import BUILTIN_CHECKS
 from runner import run_suite
 from suites import load_all_suites, load_suite, suite_summary, SUITES_DIR
-# NetBox helpers remain available for the (now optional) netbox-audit tool.
-from core import (
-    open_device,
-    nb_get, nb_get_prefixes, nb_get_devices, nb_get_vlans,
-    extract_live_networks, compare_prefixes,
-)
+# NetBox helpers are optional. core.py imports napalm, which the host does not
+# need — live collection goes through the sidecar. Import lazily so the
+# dashboard starts with Flask + docker exec only.
+try:
+    from core import (  # noqa: F401
+        nb_get, nb_get_prefixes, nb_get_devices, nb_get_vlans,
+        extract_live_networks, compare_prefixes,
+    )
+except Exception:  # noqa: BLE001 — dashboard must boot without host napalm
+    nb_get = nb_get_prefixes = nb_get_devices = nb_get_vlans = None
+    extract_live_networks = compare_prefixes = None
 
-app = Flask(__name__, static_folder=".", static_url_path="/static")
-CORS(app)
+app = Flask(__name__, static_folder=None)
+CORS(app, origins=["http://127.0.0.1:5959", "http://localhost:5959", "http://127.0.0.1:8080"])
 
 SNAPSHOTS_DIR = OUTPUT_DIR / "snapshots"
 SNAPSHOTS_DIR.mkdir(exist_ok=True)
@@ -181,12 +186,22 @@ def api_lab_fabrics():
     return jsonify({"fabrics": fabrics, "runner_up": runner_available()})
 
 
+_matrix_cache: dict = {}
+_MATRIX_TTL = float(os.getenv("LAB_CACHE_TTL", "12"))
+
+
 @app.route("/api/lab/matrix")
 def api_lab_matrix():
     fabric = (request.args.get("fabric") or "all").lower()
     if fabric != "all" and fabric not in FABRICS:
         return jsonify({"error": f"unknown fabric: {fabric}"}), 400
-    return jsonify(napalm_matrix(fabric))
+    now = time.time()
+    hit = _matrix_cache.get(fabric)
+    if hit and now - hit[0] < _MATRIX_TTL:
+        return jsonify(hit[1])
+    data = napalm_matrix(fabric)
+    _matrix_cache[fabric] = (now, data)
+    return jsonify(data)
 
 
 @app.route("/api/lab/topology")
@@ -230,7 +245,10 @@ def api_lab_run():
     body = request.get_json(silent=True) or {}
     hostname = (body.get("hostname") or "").strip()
     command = body.get("command") or ""
-    allow_write = bool(body.get("allow_write"))
+    allow_write = (
+        bool(body.get("allow_write"))
+        and os.getenv("LAB_ALLOW_WRITE", "0").lower() in ("1", "true", "yes")
+    )
     if not hostname or not command:
         return jsonify({"error": "hostname and command are required"}), 400
     if hostname not in NODE_INDEX:
@@ -364,7 +382,11 @@ def api_test_run():
 @app.route("/api/test/runs")
 def api_test_runs():
     sid = request.args.get("suite_id")
-    limit = min(int(request.args.get("limit", 50)), 200)
+    limit_raw = request.args.get("limit", "50")
+    try:
+        limit = min(max(int(limit_raw), 1), 200)
+    except (TypeError, ValueError):
+        return jsonify({"error": "limit must be an integer"}), 400
     return jsonify({"runs": results_store.list_runs(limit=limit, suite_id=sid)})
 
 
@@ -731,19 +753,24 @@ def env_health():
                             "critical": data.get("is_critical", False),
                         })
 
-                # Fans
-                fans = env.get("fans", {})
-                fan_ok = all(v.get("status", True) for v in fans.values())
-                if not fan_ok:
-                    alerts.append({"hostname": hostname, "type": "fan",
-                                   "sensor": "fans", "value": "FAILED", "critical": True})
+                # Fans / power — empty dict is UNKNOWN, not healthy (all([]) is True).
+                fans = env.get("fans") or None
+                if fans is None or fans == {}:
+                    fan_ok = None
+                else:
+                    fan_ok = all(v.get("status", True) for v in fans.values())
+                    if fan_ok is False:
+                        alerts.append({"hostname": hostname, "type": "fan",
+                                       "sensor": "fans", "value": "FAILED", "critical": True})
 
-                # Power
-                power = env.get("power", {})
-                power_ok = all(v.get("status", True) for v in power.values())
-                if not power_ok:
-                    alerts.append({"hostname": hostname, "type": "power",
-                                   "sensor": "power", "value": "FAILED", "critical": True})
+                power = env.get("power") or None
+                if power is None or power == {}:
+                    power_ok = None
+                else:
+                    power_ok = all(v.get("status", True) for v in power.values())
+                    if power_ok is False:
+                        alerts.append({"hostname": hostname, "type": "power",
+                                       "sensor": "power", "value": "FAILED", "critical": True})
 
                 # High CPU/memory
                 if max_cpu > 80:

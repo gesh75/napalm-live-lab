@@ -25,7 +25,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CLAB_DIR="${CLAB_DIR:-$SCRIPT_DIR/../DCN_Network_Tool/containerlab-multivendor}"
+CLAB_DIR="${CLAB_DIR:-$SCRIPT_DIR/topologies}"
 CLOS_TOPO="${CLOS_TOPO:-clos-evpn.clab.yml}"
 CLAB_IMAGE="${CLAB_IMAGE:-ghcr.io/srl-labs/clab:latest}"
 DASHBOARD_URL="${DASHBOARD_URL:-http://127.0.0.1:5959}"
@@ -55,7 +55,9 @@ if [[ "${1:-}" == "verify" ]]; then verify; exit $?; fi
 
 # ── 0. preflight ────────────────────────────────────────────────────────────
 [[ -d "$CLAB_DIR" ]] || die "CLAB_DIR not found: $CLAB_DIR (set CLAB_DIR=... to the containerlab-multivendor dir)"
-[[ -f "$CLAB_DIR/topologies/$CLOS_TOPO" ]] || die "topology not found: $CLAB_DIR/topologies/$CLOS_TOPO"
+[[ -f "$CLAB_DIR/$CLOS_TOPO" ]] || [[ -f "$CLAB_DIR/topologies/$CLOS_TOPO" ]] || die "topology not found: $CLAB_DIR/$CLOS_TOPO"
+TOPO_FILE="$CLAB_DIR/$CLOS_TOPO"
+[[ -f "$TOPO_FILE" ]] || TOPO_FILE="$CLAB_DIR/topologies/$CLOS_TOPO"
 
 if ! docker info >/dev/null 2>&1; then
   warn "Docker is not running — attempting to start Docker Desktop ..."

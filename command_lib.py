@@ -47,7 +47,7 @@ WRAPPER = {
 # shell-wrapping driver). A command that starts with one of these is a read.
 # Keep in sync with build_command_catalog.py.
 READ_PREFIXES = (
-    "show", "display", "get", "ping", "traceroute", "monitor", "info",
+    "show", "display", "get", "ping", "traceroute", "info",
 )
 
 # Characters that could let a CLI wrapper chain or redirect a second action.
@@ -66,26 +66,34 @@ UNSAFE_CHARS = (";", "`", ">", "<", "\n", "\r", "\x00")
 PIPE_FILTER_KEYWORDS = frozenset({
     "include", "exclude", "section", "begin", "count", "grep",
     "json", "no-more", "no_more", "nomore", "match", "last", "first",
-    "redirect", "append", "display", "i", "e", "b", "linenum", "more",
+    "display", "i", "e", "b", "linenum", "more",
 })
 
 MAX_CMD_LEN = 300
 CMD_TIMEOUT = 20
 
+# Cisco IOS-only verbs that FRR's Cisco-like CLI does NOT implement. The catalog
+# builder used to tag every Cisco show command runnable_on FRR; that was a lie.
+_CISCO_ONLY = (
+    "vtp", "spanning-tree", "etherchannel", "switchport", "port-security",
+    "cdp neighbors", "ip nat", "crypto", "eigrp", "hsrp", "vrrp",
+    "vlan database", "voice", "dial-peer",
+)
+
 
 def is_read_only(command: str) -> bool:
     """True if ``command`` only reads state (safe to run by default).
 
-    Network-CLI rule: a command that *starts* with an operational verb
-    (show/display/get/ping/traceroute/monitor/info) is a read — regardless of
-    later words. This avoids false-positives like ``show commit history`` or
-    ``show reboot reason`` while still blocking ``configure``, ``reload``,
-    ``no …``, ``write``, ``delete`` (none of which start with a read verb).
+    Network-CLI rule: the *first token* must be an operational verb
+    (show/display/get/ping/traceroute/info) — token match, not string
+    prefix, so ``gettext`` cannot ride ``get``. ``monitor`` is not a read:
+    on EOS ``monitor session`` is SPAN *config*.
     """
     c = (command or "").strip().lower()
     if not c:
         return False
-    if not c.startswith(READ_PREFIXES):
+    first = c.split()[0] if c.split() else ""
+    if first not in READ_PREFIXES:
         return False
     # Defense-in-depth: a piped shell escape (e.g. `show run | bash id`) starts
     # with a read prefix but is NOT a read. Reject any non-filter pipe segment.
@@ -195,6 +203,18 @@ def run_command(hostname: str, command: str, allow_write: bool = False) -> dict:
     wrapper = WRAPPER.get(driver)
     if not wrapper:
         return _err(hostname, command, f"no CLI wrapper for driver '{driver}'")
+
+    low = command.lower()
+    if driver == "frr" and any(tok in low for tok in _CISCO_ONLY):
+        return {
+            "ok": False, "blocked": True, "hostname": hostname,
+            "command": command, "driver": driver,
+            "wrapper": " ".join(wrapper), "read_only": True,
+            "output": "",
+            "error": "blocked: Cisco IOS-only command; not valid on FRR "
+                     "(catalog used to tag these runnable_on FRR — that was a lie)",
+            "took_ms": int((time.time() - t0) * 1000),
+        }
 
     read_only = is_read_only(command)
     if not read_only:
