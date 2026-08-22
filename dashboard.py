@@ -30,6 +30,8 @@ import threading
 from datetime import datetime
 from pathlib import Path
 
+HERE = Path(__file__).resolve().parent
+
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
@@ -40,6 +42,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from config import (
     SITES, FABRICS, NODE_INDEX, OUTPUT_DIR,
     SSH_USER, SSH_KEY, NETBOX_URL, NETBOX_TOKEN, ZTASID,
+    is_safe_getter,
 )
 # Collection is now backed by the live containerlab fabrics via the napalm-runner
 # sidecar (real NAPALM for eos/srl) + docker exec (FRR). These drop-in shims keep
@@ -72,7 +75,7 @@ except Exception:  # noqa: BLE001 — dashboard must boot without host napalm
     extract_live_networks = compare_prefixes = None
 
 app = Flask(__name__, static_folder=None)
-CORS(app, origins=["http://127.0.0.1:5959", "http://localhost:5959", "http://127.0.0.1:8080"])
+CORS(app, origins=["http://127.0.0.1:5959", "http://localhost:5959"])
 
 SNAPSHOTS_DIR = OUTPUT_DIR / "snapshots"
 SNAPSHOTS_DIR.mkdir(exist_ok=True)
@@ -132,18 +135,18 @@ def _update_job(job_id: str, **kwargs):
 @app.route("/")
 def index():
     # The Live Lab view (matrix + Command Console + topology) is now the home page.
-    return send_from_directory(".", "lab.html")
+    return send_from_directory(HERE, "lab.html")
 
 
 @app.route("/classic")
 def classic():
     # The classic audit/snapshot tools dashboard.
-    return send_from_directory(".", "dashboard.html")
+    return send_from_directory(HERE, "dashboard.html")
 
 
 @app.route("/dashboard.js")
 def serve_js():
-    return send_from_directory(".", "dashboard.js")
+    return send_from_directory(HERE, "dashboard.js")
 
 
 # ── Live Lab view (CLOS-EVPN + 3-Tier vs NAPALM) ────────────────────────────────
@@ -155,17 +158,17 @@ def favicon():
 
 @app.route("/lab")
 def lab_page():
-    return send_from_directory(".", "lab.html")
+    return send_from_directory(HERE, "lab.html")
 
 
 @app.route("/lab.js")
 def lab_js():
-    return send_from_directory(".", "lab.js")
+    return send_from_directory(HERE, "lab.js")
 
 
 @app.route("/lab.css")
 def lab_css():
-    return send_from_directory(".", "lab.css")
+    return send_from_directory(HERE, "lab.css")
 
 
 @app.route("/api/lab/fabrics")
@@ -215,7 +218,14 @@ def api_lab_topology():
     fabric = (request.args.get("fabric") or "clos").lower()
     if fabric not in FABRICS:
         return jsonify({"error": f"unknown fabric: {fabric}"}), 400
-    # Derive the diagram from the cached full matrix — do not collect twice.
+    # Prefer slicing the cached "all" matrix so a default refresh (matrix=all
+    # + topology=clos + topology=dcn) does not collect three times.
+    now = time.time()
+    all_hit = _matrix_cache.get("all")
+    if all_hit and now - all_hit[0] < _MATRIX_TTL:
+        nodes = [n for n in all_hit[1].get("nodes", []) if n.get("fabric") == fabric]
+        matrix = {**all_hit[1], "fabric": fabric, "nodes": nodes}
+        return jsonify(lab_topology(fabric, matrix))
     matrix = _cached_matrix(fabric)
     return jsonify(lab_topology(fabric, matrix))
 
@@ -344,8 +354,10 @@ def api_test_assert():
     elif "intent" in src:
         root = run_intent(hostname, src["intent"])
     else:
-        getters = [src["getter"]] if "getter" in src else ["get_facts"]
-        root = collect_node(hostname, getters)
+        getter = src["getter"] if "getter" in src else "get_facts"
+        if not is_safe_getter(getter):
+            return jsonify({"error": f"rejected getter '{getter}' — only get_* NAPALM getters are allowed"}), 400
+        root = collect_node(hostname, [getter])
     ar = evaluate_check(check, root)
     return jsonify({"hostname": hostname, "field": check.field, "op": check.op,
                     "quantifier": check.quantifier, "expected": check.expected,
@@ -644,6 +656,8 @@ def netbox_audit():
     site = data.get("site", "").lower()
     if not site or site not in SITES:
         return jsonify({"error": f"Unknown site: {site}"}), 400
+    if nb_get_prefixes is None or not NETBOX_URL:
+        return jsonify({"error": "NetBox helpers unavailable (no host napalm / NETBOX_URL)"}), 501
 
     job_id = _new_job("netbox_audit", site)
 

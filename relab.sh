@@ -106,13 +106,9 @@ else
   warn "napalm-runner not running and lab_runner/up.sh not found — eos/srl collection will fail"
 fi
 
-# ── 2. 3-Tier FRR fabric (this repo's dcn-3tier.clab.yml) ───────────────────
-if docker ps --format '{{.Names}}' | grep -qx de-fra-core-01; then
-  ok "3-Tier FRR network up"
-else
-  say "deploying 3-Tier FRR via containerlab ..."
-  clab_deploy "$DCN_FILE" && ok "3-Tier up" || warn "3-Tier deploy failed"
-fi
+# ── 2. 3-Tier FRR fabric — always --reconfigure (veths die on Docker restart)
+say "redeploying 3-Tier FRR via clab --reconfigure ..."
+clab_deploy "$DCN_FILE" --reconfigure && ok "3-Tier up" || warn "3-Tier deploy failed"
 
 # ── 3. CLOS fabric: clab deploy --reconfigure (the veth-repair fix) ─────────
 say "redeploying CLOS fabric via clab --reconfigure (recreates veths) ..."

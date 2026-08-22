@@ -74,6 +74,18 @@ class TestSecurityAndConfig:
         src = (PKG_DIR / "relab.sh").read_text(encoding="utf-8")
         assert '-w "$CLAB_DIR/topologies"' not in src
         assert "clab_deploy" in src
+        assert "clab_deploy \"$DCN_FILE\" --reconfigure" in src
+
+    def test_topology_sidecar_files_exist(self):
+        assert (PKG_DIR / "topologies" / "startup" / "ceos.cfg").is_file()
+        assert (PKG_DIR / "topologies" / "frr" / "daemons").is_file()
+
+    def test_commit_config_is_not_a_safe_getter(self):
+        assert config.is_safe_getter("get_facts") is True
+        assert config.is_safe_getter("commit_config") is False
+        assert config.is_safe_getter("rollback") is False
+        assert config.is_safe_getter("cli") is False
+        assert config.safe_getters(["commit_config", "get_facts"]) == ["get_facts"]
 
     def test_no_hardcoded_secret_in_config_source(self):
         src = Path(config.__file__).read_text(encoding="utf-8")

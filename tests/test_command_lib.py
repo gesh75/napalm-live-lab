@@ -44,6 +44,7 @@ pytestmark = pytest.mark.hermetic
     ("show run | cli show running-config", False),
     ("show running-config | redirect flash:startup-config", False),
     ("show run | append flash:foo", False),
+    ("show run | more", False),
     ("monitor session 1 source Ethernet1", False),
     ("gettext foo", False),
     ("configure terminal", False),

@@ -148,7 +148,7 @@ def is_read_only(command: str) -> bool:
         allowed = {
             "include", "exclude", "section", "begin", "count", "grep",
             "json", "no-more", "no_more", "nomore", "match", "last", "first",
-            "display", "i", "e", "b", "linenum", "more",
+            "display", "i", "e", "b", "linenum",
         }
         for seg in c.split("|")[1:]:
             words = seg.strip().split()

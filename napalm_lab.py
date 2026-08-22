@@ -28,6 +28,7 @@ from datetime import datetime
 from config import (
     FABRICS, NODE_INDEX, NAPALM_SUPPORT, STANDARD_GETTERS,
     RUNNER_CONTAINER, EOS_USER, EOS_PASS, SRL_USER, SRL_PASS,
+    is_safe_getter, safe_getters,
 )
 
 def _find_docker() -> str:
@@ -201,10 +202,8 @@ def _frr_collect(node: dict, getters: list[str]) -> dict:
             data["get_mac_address_table"] = []
             mark("get_mac_address_table", False, "FRR is L3-only — no MAC table")
         elif g == "get_network_instances":
-            data["get_network_instances"] = {
-                "default": {"name": "default", "type": "DEFAULT_INSTANCE"},
-            }
-            mark("get_network_instances", True)
+            data["get_network_instances"] = {}
+            mark("get_network_instances", False, "FRR has no VRF getter via vtysh")
         else:
             mark(g, False, "unsupported")
 
@@ -260,7 +259,7 @@ def _srl_exec_fallback(node: dict, getters: list[str]) -> dict:
 
 def collect_node(hostname: str, getters: list[str] | None = None) -> dict:
     """Collect one lab node. Returns a rich matrix-ready dict. Never raises."""
-    getters = getters or STANDARD_GETTERS
+    getters = safe_getters(getters)
     node = NODE_INDEX.get(hostname)
     if not node:
         return {"hostname": hostname, "error": "unknown node", "reachable": False}

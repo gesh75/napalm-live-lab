@@ -17,6 +17,7 @@ via `docker exec ... vtysh` — surfaced honestly in the coverage matrix.
 """
 
 import os
+import re
 from pathlib import Path
 
 # ── SSH (legacy direct-connect; unused for the docker lab) ──────────────────────
@@ -47,6 +48,19 @@ STANDARD_GETTERS = [
     "get_bgp_neighbors", "get_lldp_neighbors", "get_environment",
     "get_arp_table", "get_mac_address_table", "get_network_instances",
 ]
+
+# Fail-closed: only names that look like NAPALM getters. Blocks commit_config,
+# rollback, cli, load_merge_candidate, etc. from reaching getattr(device, name).
+_GETTER_NAME_RE = re.compile(r"^get_[a-z][a-z0-9_]*$")
+
+
+def is_safe_getter(name: str) -> bool:
+    return bool(isinstance(name, str) and _GETTER_NAME_RE.fullmatch(name))
+
+
+def safe_getters(getters: list[str] | None) -> list[str]:
+    src = getters or STANDARD_GETTERS
+    return [g for g in src if is_safe_getter(g)]
 
 # ── LIVE LAB FABRICS ────────────────────────────────────────────────────────────
 FABRICS = {

@@ -14,7 +14,7 @@ set -euo pipefail
 
 IMAGE="napalm-runner:latest"
 NAME="napalm-runner"
-NETWORKS=("clos-mgmt" "dcn-lab_lab-net")
+NETWORKS=("clos-mgmt" "dcn-lab")
 
 # Resolve this script's directory so the build context is correct regardless of cwd.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

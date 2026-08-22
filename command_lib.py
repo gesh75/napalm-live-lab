@@ -66,7 +66,7 @@ UNSAFE_CHARS = (";", "`", ">", "<", "\n", "\r", "\x00")
 PIPE_FILTER_KEYWORDS = frozenset({
     "include", "exclude", "section", "begin", "count", "grep",
     "json", "no-more", "no_more", "nomore", "match", "last", "first",
-    "display", "i", "e", "b", "linenum", "more",
+    "display", "i", "e", "b", "linenum",
 })
 
 MAX_CMD_LEN = 300
