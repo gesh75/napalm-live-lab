@@ -1,5 +1,8 @@
+# CLOS-EVPN — 3 spine × 6 leaf, mixed Arista cEOS / Nokia SR Linux / FRR.
+# Default containerlab prefix ("clab") is required: config.py names containers
+# clab-clos-evpn-<node>. Do NOT empty the name prefix here — that would name them
+# <node> and docker exec from the dashboard would miss every box.
 name: clos-evpn
-prefix: ""
 mgmt:
   network: clos-mgmt
   ipv4-subnet: 172.20.20.0/24
@@ -8,11 +11,16 @@ topology:
   kinds:
     ceos:
       image: ceos:4.33.1F
+      startup-config: startup/ceos.cfg
     nokia_srlinux:
       image: ghcr.io/nokia/srlinux:24.7.2
       type: ixrd3l
     linux:
       image: quay.io/frrouting/frr:10.1.1
+      binds:
+        - frr/daemons:/etc/frr/daemons
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
 
   nodes:
     spine1:

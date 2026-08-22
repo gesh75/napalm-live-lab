@@ -49,8 +49,8 @@ function renderSiteSelector() {
         All Sites <span class="count">${total}</span>
     </button>`;
     for (const [site, info] of Object.entries(sitesData)) {
-        html += `<button class="site-btn" data-site="${site}" onclick="selectSite('${site}')">
-            ${site.toUpperCase()} <span class="count">${info.device_count}</span>
+        html += `<button class="site-btn" data-site="${escapeHtml(site)}" onclick="selectSite('${escapeHtml(site)}')">
+            ${escapeHtml(site).toUpperCase()} <span class="count">${info.device_count}</span>
         </button>`;
     }
     el.innerHTML = html;
@@ -385,7 +385,7 @@ function renderResult(tool, data) {
     };
     const fn = renderers[tool];
     if (fn) fn(data);
-    else document.getElementById("resultArea").innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+    else document.getElementById("resultArea").innerHTML = `<pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>`;
 }
 
 // ── 1. Version Audit ───────────────────────────────────────────────────────
@@ -798,8 +798,8 @@ async function updateRecentJobs() {
         el.innerHTML = jobs.slice(-5).reverse().map(j => {
             const icon = j.status === "done" ? "✅" : j.status === "error" ? "❌" : "⏳";
             return `<div style="padding: 4px 0; border-bottom: 1px solid var(--border);">
-                ${icon} <strong>${j.type}</strong> ${j.site.toUpperCase()}<br>
-                <small style="color:var(--text-muted)">${j.message}</small>
+                ${icon} <strong>${escapeHtml(j.type)}</strong> ${escapeHtml(String(j.site || "").toUpperCase())}<br>
+                <small style="color:var(--text-muted)">${escapeHtml(j.message)}</small>
             </div>`;
         }).join("");
     } catch (e) {}
@@ -808,7 +808,9 @@ async function updateRecentJobs() {
 // ── Utilities ──────────────────────────────────────────────────────────────
 
 function escapeHtml(s) {
-    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    return String(s ?? "").replace(/[&<>"']/g, ch => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[ch]));
 }
 
 function formatUptime(seconds) {

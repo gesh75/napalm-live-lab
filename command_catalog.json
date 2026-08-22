@@ -281,9 +281,7 @@
       "desc": "VLAN Trunking Protocol > VTP Verification",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 1,
@@ -296,9 +294,7 @@
       "desc": "Basic Networking > Setup > Set Clock",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2,
@@ -311,9 +307,7 @@
       "desc": "Basic Networking > Interface Verification",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 3,
@@ -326,9 +320,7 @@
       "desc": "Basic Networking > Interface Verification",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 4,
@@ -341,9 +333,7 @@
       "desc": "Basic Networking > DHCP > Verify DHCP Pool",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 5,
@@ -356,9 +346,7 @@
       "desc": "Intermediate Networking > VLANs > Verification",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 6,
@@ -371,9 +359,7 @@
       "desc": "Intermediate Networking > DTP (Dynamic Trunking Protocol) > Verify DTP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 7,
@@ -386,9 +372,7 @@
       "desc": "Advanced Networking > OSPFv2 > OSPF Router IDs > Modify OSPF router ID",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 8,
@@ -401,9 +385,7 @@
       "desc": "Advanced Networking > OSPFv2 > OSPF - Point-to-Point Networks > Find Designated Router and Backup",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 9,
@@ -416,9 +398,7 @@
       "desc": "Advanced Networking > OSPFv2 > OSPF - Point-to-Point Networks > Loopback and P2P Networks",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 10,
@@ -431,9 +411,7 @@
       "desc": "Advanced Networking > OSPFv2 > Modifying Single Area OSPF > Show OSPF Hello Packet Intervals",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 11,
@@ -446,9 +424,7 @@
       "desc": "Advanced Networking > OSPFv2 > OSPF Default Routes > Verify Propogated Default Route",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 12,
@@ -461,9 +437,7 @@
       "desc": "Advanced Networking > OSPFv2 > Verify Single-Area OSPF > Verify OSPF Neighbors",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 13,
@@ -476,9 +450,7 @@
       "desc": "Advanced Networking > OSPFv2 > Verify Single-Area OSPF > Verify OSPF Protocols",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 14,
@@ -491,9 +463,7 @@
       "desc": "Advanced Networking > OSPFv2 > Verify Single-Area OSPF > Verify OSPF Process Info",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 15,
@@ -506,9 +476,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 16,
@@ -521,9 +489,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 17,
@@ -536,9 +502,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 18,
@@ -551,9 +515,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 19,
@@ -566,9 +528,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 20,
@@ -581,9 +541,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 21,
@@ -596,9 +554,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 22,
@@ -611,9 +567,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 23,
@@ -626,9 +580,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 24,
@@ -641,9 +593,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 25,
@@ -656,9 +606,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 26,
@@ -671,9 +619,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 27,
@@ -686,9 +632,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 28,
@@ -701,9 +645,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 29,
@@ -716,9 +658,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 30,
@@ -731,9 +671,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 31,
@@ -746,9 +684,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 32,
@@ -761,9 +697,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 33,
@@ -776,9 +710,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 34,
@@ -791,9 +723,7 @@
       "desc": "",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 35,
@@ -806,9 +736,7 @@
       "desc": "TIPS > iinclude",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 36,
@@ -821,9 +749,7 @@
       "desc": "TIPS > bbegin",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 37,
@@ -836,9 +762,7 @@
       "desc": "Crashinfo > How to get crashinfo > Is thre crashinfo",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 38,
@@ -851,9 +775,7 @@
       "desc": "Investigateion destination port from IP address",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 39,
@@ -944,9 +866,7 @@
       "desc": "Connectivity > Ping",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 46,
@@ -959,9 +879,7 @@
       "desc": "Connectivity > Ping From Specific VRF",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 47,
@@ -974,9 +892,7 @@
       "desc": "Connectivity > Traceroute",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 48,
@@ -989,9 +905,7 @@
       "desc": "Verification > Overview Interface IP Addresses",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 49,
@@ -1004,9 +918,7 @@
       "desc": "Verification > Display Routing Table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 50,
@@ -1019,9 +931,7 @@
       "desc": "Verification > Display Routing Table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 51,
@@ -1086,9 +996,7 @@
       "desc": "Important show commands | display config saved in RAM (and the currently running configuration in the device)",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 56,
@@ -1101,9 +1009,7 @@
       "desc": "Important show commands | display config saved in NVRAM",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 57,
@@ -1116,9 +1022,7 @@
       "desc": "Important show commands | ",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 58,
@@ -1131,9 +1035,7 @@
       "desc": "Dynamic routing OSPF > OSPF verification | summary of router's OSPF-enabled interfaces. :warning: This command does NOT seem to work on Packet Tracer 7.3",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 59,
@@ -1146,9 +1048,7 @@
       "desc": "Dynamic routing OSPF > OSPF verification | in-detail list of every OSPF-enabled interface",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 60,
@@ -1161,9 +1061,7 @@
       "desc": "Dynamic routing OSPF > OSPF verification | in-detail information for a particular OSPF-enabled interface",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 61,
@@ -1176,9 +1074,7 @@
       "desc": "Dynamic routing EIGRP > EIGRP Verification | displays the nighbor table. Use it to verify the router recognizes its neighbors.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 62,
@@ -1191,9 +1087,7 @@
       "desc": "Dynamic routing EIGRP > EIGRP Verification | display **only EIGRP** entries in the routing table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 63,
@@ -1206,9 +1100,7 @@
       "desc": "Dynamic routing EIGRP > EIGRP Verification | verifies which interface are enabled for EIGRP, number of peers, and transmit queues",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 64,
@@ -1221,9 +1113,7 @@
       "desc": "Dynamic routing EIGRP for IPv6 > Verification | verifies the current configured values for EIGRP (and any additional enabled routing protocol on the device)",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 65,
@@ -1236,9 +1126,7 @@
       "desc": "Dynamic routing EIGRP for IPv6 > Verification | displays the nighbor table. Use it to verify the router recognizes its neighbors.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 66,
@@ -1251,9 +1139,7 @@
       "desc": "Dynamic routing EIGRP for IPv6 > Verification | display **only EIGRP** entries in the routing table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 67,
@@ -1266,9 +1152,7 @@
       "desc": "Dynamic routing EIGRP for IPv6 > Verification | verifies which interface are enabled for EIGRP, number of peers, and transmit queues",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 68,
@@ -1281,9 +1165,7 @@
       "desc": "Chassis, line cards, SFP/transceiver inventory.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 69,
@@ -1296,9 +1178,7 @@
       "desc": "PSU, fans, temperature sensors.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 70,
@@ -1311,9 +1191,7 @@
       "desc": "Top processes by CPU usage.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 71,
@@ -1326,9 +1204,7 @@
       "desc": "Memory pools and free/used.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 72,
@@ -1341,9 +1217,7 @@
       "desc": "Configured boot image and config-register.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 73,
@@ -1356,9 +1230,7 @@
       "desc": "Per-interface descriptions and status.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 74,
@@ -1371,9 +1243,7 @@
       "desc": "SFP/QSFP DDM (RX/TX power, temp).",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 75,
@@ -1386,9 +1256,7 @@
       "desc": "Counts of routes per protocol.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 76,
@@ -1401,9 +1269,7 @@
       "desc": "LSDB summary.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 77,
@@ -1416,9 +1282,7 @@
       "desc": "Per-class counters and drops.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 78,
@@ -1431,9 +1295,7 @@
       "desc": "Comprehensive diagnostic dump.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 79,
@@ -1511,9 +1373,7 @@
       "desc": "Displays the VTP counters for the switch",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 85,
@@ -1526,9 +1386,7 @@
       "desc": "Verifying VLAN Information",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 86,
@@ -1541,9 +1399,7 @@
       "desc": "Displays information of VLAN 2 only",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 87,
@@ -1556,9 +1412,7 @@
       "desc": "Displays information of VLAN named marketing",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 88,
@@ -1571,9 +1425,7 @@
       "desc": "Displays the administrative and operational",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 89,
@@ -1586,9 +1438,7 @@
       "desc": "Displays the administrative and operational",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 90,
@@ -1601,9 +1451,7 @@
       "desc": "The stored configurations of VLANs 1 through 1005 are always",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 91,
@@ -1616,9 +1464,7 @@
       "desc": "Displays interface fastethernet",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 92,
@@ -1631,9 +1477,7 @@
       "desc": "Displays EtherChannel",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 93,
@@ -1646,9 +1490,7 @@
       "desc": "Displays all EtherChannel",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 94,
@@ -1661,9 +1503,7 @@
       "desc": "Displays port channel",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 95,
@@ -1676,9 +1516,7 @@
       "desc": "EtherChannel information",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 96,
@@ -1691,9 +1529,7 @@
       "desc": "EtherChannel 1",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 97,
@@ -1706,9 +1542,7 @@
       "desc": "Shows LACP neighbor",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 98,
@@ -1721,9 +1555,7 @@
       "desc": "Shows PAgP neighbor",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 99,
@@ -1736,9 +1568,7 @@
       "desc": "The root switch should be a backbone or distribution switch",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 100,
@@ -1751,9 +1581,7 @@
       "desc": "The root switch should be a backbone or distribution switch",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 101,
@@ -1766,9 +1594,7 @@
       "desc": "The root switch should be a backbone or distribution switch",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 102,
@@ -1781,9 +1607,7 @@
       "desc": "The root switch should be a backbone or distribution switch",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 103,
@@ -1796,9 +1620,7 @@
       "desc": "BPDU Guard (2xxx/older 3xxx Series)",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 104,
@@ -1811,9 +1633,7 @@
       "desc": "Verifies whether BPDU Guard is enabled",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 105,
@@ -1826,9 +1646,7 @@
       "desc": "EXEC mode",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 106,
@@ -1841,9 +1659,7 @@
       "desc": "CONFIGURING THE SWITCH PRIORITY OF A VLAN",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 107,
@@ -1856,9 +1672,7 @@
       "desc": "Enables BackboneFast. BackboneFast is initiated when",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 108,
@@ -1871,9 +1685,7 @@
       "desc": "Verifies BackboneFast has been enabled",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 109,
@@ -1886,9 +1698,7 @@
       "desc": "Root Guard",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 110,
@@ -1901,9 +1711,7 @@
       "desc": "Indicates whether any ports are in a rootinconsistent state",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 111,
@@ -1916,9 +1724,7 @@
       "desc": "The show spanning-tree root command output includes root ID for all",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 112,
@@ -1931,9 +1737,7 @@
       "desc": "Shows which ports are alternate or root ports",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 113,
@@ -1946,9 +1750,7 @@
       "desc": "Moves to global configuration mode",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 114,
@@ -1961,9 +1763,7 @@
       "desc": "Displays UDLD information",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 115,
@@ -1976,9 +1776,7 @@
       "desc": "Ethernet 1/0/1",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 116,
@@ -1991,9 +1789,7 @@
       "desc": "CONFIGURING THE SWITCH PRIORITY OF A VLAN",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 117,
@@ -2006,9 +1802,7 @@
       "desc": "Displays the summary of what is currently",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 118,
@@ -2021,9 +1815,7 @@
       "desc": "Applies all changes and returns to global",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 119,
@@ -2036,9 +1828,7 @@
       "desc": "Displays STP information",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 120,
@@ -2051,9 +1841,7 @@
       "desc": "Displays STP information on active",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 121,
@@ -2066,9 +1854,7 @@
       "desc": "Displays status and configuration of this",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 122,
@@ -2081,9 +1867,7 @@
       "desc": "Displays a detailed summary of interface",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 123,
@@ -2096,9 +1880,7 @@
       "desc": "Displays the total lines of the STP section",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 124,
@@ -2111,9 +1893,7 @@
       "desc": "Displays STP information for VLAN 5",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 125,
@@ -2126,9 +1906,7 @@
       "desc": "Displays the MST region configuration",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 126,
@@ -2141,9 +1919,7 @@
       "desc": "Displays the message digest 5 (MD5)",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 127,
@@ -2156,9 +1932,7 @@
       "desc": "Displays the MST information for",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 128,
@@ -2171,9 +1945,7 @@
       "desc": "VERIFYING STP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 129,
@@ -2186,9 +1958,7 @@
       "desc": "VERIFYING STP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 130,
@@ -2201,9 +1971,7 @@
       "desc": "VERIFYING STP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 131,
@@ -2216,9 +1984,7 @@
       "desc": "Displays EIGRP neighbor table. Incorrect",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 132,
@@ -2231,9 +1997,7 @@
       "desc": "Displays EIGRP IPv6 neighbor table. Incorrect",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 133,
@@ -2246,9 +2010,7 @@
       "desc": "Displays key chains created on the router",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 134,
@@ -2261,9 +2023,7 @@
       "desc": "The show ip eigrp neighbors detail command will verify",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 135,
@@ -2276,9 +2036,7 @@
       "desc": "Shows info for each interface",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 136,
@@ -2291,9 +2049,7 @@
       "desc": "Shows more detailed information for each",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 137,
@@ -2306,9 +2062,7 @@
       "desc": "Shows info for a specific interface",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 138,
@@ -2321,9 +2075,7 @@
       "desc": "Shows info for interfaces running process",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 139,
@@ -2336,9 +2088,7 @@
       "desc": "The show ip eigrp topology command shows where",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 140,
@@ -2351,9 +2101,7 @@
       "desc": "Displays all entries in the EIGRP topology",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 141,
@@ -2366,9 +2114,7 @@
       "desc": "Shows the number and type of packets",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 142,
@@ -2381,9 +2127,7 @@
       "desc": "Displays the status of interfaces",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 143,
@@ -2396,9 +2140,7 @@
       "desc": "Displays a summarized status of interfaces",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 144,
@@ -2411,9 +2153,7 @@
       "desc": "Shows the parameters and current state of",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 145,
@@ -2426,9 +2166,7 @@
       "desc": "Displays IPv6 info for each interface",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 146,
@@ -2441,9 +2179,7 @@
       "desc": "Displays IPv6 info for specific interface",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 147,
@@ -2456,9 +2192,7 @@
       "desc": "Displays IPv6 info for interfaces running",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 148,
@@ -2471,9 +2205,7 @@
       "desc": "Displays a detailed EIGRP IPv6 neighbor",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 149,
@@ -2486,9 +2218,7 @@
       "desc": "Displays the EIGRP IPv6 topology table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 150,
@@ -2501,9 +2231,7 @@
       "desc": "Displays IPv6 neighbor discovery cache",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 151,
@@ -2516,9 +2244,7 @@
       "desc": "Displays the current IPv6 routing table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 152,
@@ -2531,9 +2257,7 @@
       "desc": "IPv6 routing table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 153,
@@ -2546,9 +2270,7 @@
       "desc": "Displays IPv6 router advertisement",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 154,
@@ -2561,9 +2283,7 @@
       "desc": "VERIFYING EIGRP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 155,
@@ -2576,9 +2296,7 @@
       "desc": "Incorrect authentication configuration will",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 156,
@@ -2591,9 +2309,7 @@
       "desc": "Displays the OSPFv3 neighbor table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 157,
@@ -2606,9 +2322,7 @@
       "desc": "Displays the OSPFv3 routes in the routing table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 158,
@@ -2621,9 +2335,7 @@
       "desc": "Verifies authentication setup on a specific",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 159,
@@ -2636,9 +2348,7 @@
       "desc": "Displays IPsec security associations on a",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 160,
@@ -2651,9 +2361,7 @@
       "desc": "Displays the OSPFv3 routes in the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 161,
@@ -2666,9 +2374,7 @@
       "desc": "Displays border and boundary router",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 162,
@@ -2681,9 +2387,7 @@
       "desc": "Displays Type-4 LSAs",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 163,
@@ -2696,9 +2400,7 @@
       "desc": "Displays Type-5 LSAs",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 164,
@@ -2711,9 +2413,7 @@
       "desc": "Displays network LSAs",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 165,
@@ -2726,9 +2426,7 @@
       "desc": "Displays locally generated LSAs",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 166,
@@ -2741,9 +2439,7 @@
       "desc": "Lists all OSPF neighbors and their",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 167,
@@ -2756,9 +2452,7 @@
       "desc": "Displays a detailed list of neighbors",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 168,
@@ -2771,9 +2465,7 @@
       "desc": "OSPFv3 routing process",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 169,
@@ -2786,9 +2478,7 @@
       "desc": "Displays the internal OSPF routing table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 170,
@@ -2801,9 +2491,7 @@
       "desc": "Displays OSPFv3-related database",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 171,
@@ -2816,9 +2504,7 @@
       "desc": "Displays how many of each type of LSA",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 172,
@@ -2831,9 +2517,7 @@
       "desc": "Displays OSPFv3-related interface",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 173,
@@ -2846,9 +2530,7 @@
       "desc": "Displays OSPFv3-related neighbor",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 174,
@@ -2861,9 +2543,7 @@
       "desc": "Displays parameters and the current",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 175,
@@ -2876,9 +2556,7 @@
       "desc": "Displays information about virtual links",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 176,
@@ -2891,9 +2569,7 @@
       "desc": "VERIFYING OSPF CONFIGURATION",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 177,
@@ -2906,9 +2582,7 @@
       "desc": "Displays summary address entries in the RIP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 178,
@@ -2921,9 +2595,7 @@
       "desc": "Displays the link-state advertisement (LSA)",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 179,
@@ -2936,9 +2608,7 @@
       "desc": "Displays route maps that are configured on the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 180,
@@ -2951,9 +2621,7 @@
       "desc": "The objective is to forward Internet traffic sourced from the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 181,
@@ -2966,9 +2634,7 @@
       "desc": "The objective is to forward Internet traffic sourced from the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 182,
@@ -2981,9 +2647,7 @@
       "desc": "The show ip sla application command displays",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 183,
@@ -2996,9 +2660,7 @@
       "desc": "The use of a number in this command is optional",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 184,
@@ -3011,9 +2673,7 @@
       "desc": "Step 1: Define Probe(s)",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 185,
@@ -3026,9 +2686,7 @@
       "desc": "Displays the current operational status and",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 186,
@@ -3041,9 +2699,7 @@
       "desc": "VERIFYING POLICY-BASED ROUTING",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 187,
@@ -3056,9 +2712,7 @@
       "desc": "CONFIGURING BGP: CLASSIC CONFIGURATION",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 188,
@@ -3071,9 +2725,7 @@
       "desc": "CONFIGURING BGP: CLASSIC CONFIGURATION",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 189,
@@ -3086,9 +2738,7 @@
       "desc": "CONFIGURING BGP: CLASSIC CONFIGURATION",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 190,
@@ -3101,9 +2751,7 @@
       "desc": "Displays routes for all address families",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 191,
@@ -3116,9 +2764,7 @@
       "desc": "Displays information about BGP connections",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 192,
@@ -3131,9 +2777,7 @@
       "desc": "Displays entries in the IPv6 BGP routing",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 193,
@@ -3146,9 +2790,7 @@
       "desc": "Displays the IPv6 BGP routes that fail to",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 194,
@@ -3161,9 +2803,7 @@
       "desc": "Displays entries in the BGP table",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 195,
@@ -3176,9 +2816,7 @@
       "desc": "Displays networks that are not installed in",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 196,
@@ -3191,9 +2829,7 @@
       "desc": "Displays the status of all IPv4 BGP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 197,
@@ -3206,9 +2842,7 @@
       "desc": "Displays the status of all IPv6 BGP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 198,
@@ -3221,9 +2855,7 @@
       "desc": "Displays the IPv4 BGP entries from the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 199,
@@ -3236,9 +2868,7 @@
       "desc": "Displays the IPv4 BGP entries from the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 200,
@@ -3251,9 +2881,7 @@
       "desc": "Forces BGP to clear its table and resets all BGP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 201,
@@ -3266,9 +2894,7 @@
       "desc": "To find all subnets reachable via AS 65002 (AS path begins with",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 202,
@@ -3281,9 +2907,7 @@
       "desc": "Distribute Lists",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 203,
@@ -3296,9 +2920,7 @@
       "desc": "IP Services",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 204,
@@ -3311,9 +2933,7 @@
       "desc": "Verifying NAT and PAT Configurations",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 205,
@@ -3326,9 +2946,7 @@
       "desc": "Verifying NAT and PAT Configurations",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 206,
@@ -3341,9 +2959,7 @@
       "desc": "Displays access lists",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 207,
@@ -3356,9 +2972,7 @@
       "desc": "Displays the translation",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 208,
@@ -3371,9 +2985,7 @@
       "desc": "Displays NAT statistics",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 209,
@@ -3386,9 +2998,7 @@
       "desc": "Displays HSRP information",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 210,
@@ -3401,9 +3011,7 @@
       "desc": "Displays a single-line output summary of",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 211,
@@ -3416,9 +3024,7 @@
       "desc": "Options are available that make it possible to optimize HSRP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 212,
@@ -3431,9 +3037,7 @@
       "desc": "Displays a brief status of all VRRP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 213,
@@ -3446,9 +3050,7 @@
       "desc": "VRRP group 10",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 214,
@@ -3461,9 +3063,7 @@
       "desc": "Displays information about VRRPv2 as",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 215,
@@ -3476,9 +3076,7 @@
       "desc": "Displays a brief summary about VRRPv2",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 216,
@@ -3491,9 +3089,7 @@
       "desc": "Displays information about VRRPv3 as",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 217,
@@ -3506,9 +3102,7 @@
       "desc": "Debugging VRRP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 218,
@@ -3521,9 +3115,7 @@
       "desc": "Displays a list of all bindings",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 219,
@@ -3536,9 +3128,7 @@
       "desc": "Clears an automatic address",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 220,
@@ -3551,9 +3141,7 @@
       "desc": "Displays a list of all address",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 221,
@@ -3566,9 +3154,7 @@
       "desc": "Displays information about DHCP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 222,
@@ -3581,9 +3167,7 @@
       "desc": "DHCP pool named name",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 223,
@@ -3596,9 +3180,7 @@
       "desc": "Displays interface on which DHCP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 224,
@@ -3611,9 +3193,7 @@
       "desc": "Displays a list of the number of",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 225,
@@ -3626,9 +3206,7 @@
       "desc": "Displays the IPv6 to MAC address",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 226,
@@ -3641,9 +3219,7 @@
       "desc": "Displays DHCPv6 pool statistics",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 227,
@@ -3656,9 +3232,7 @@
       "desc": "Displays interface on which DHCPv6",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 228,
@@ -3671,9 +3245,7 @@
       "desc": "Verifies that SSH is enabled",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 229,
@@ -3686,9 +3258,7 @@
       "desc": "CONFIGURING PASSWORDS",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 230,
@@ -3701,9 +3271,7 @@
       "desc": "Saves the running configuration",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 231,
@@ -3716,9 +3284,7 @@
       "desc": "SCP server is enabled and visible in the running",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 232,
@@ -3731,9 +3297,7 @@
       "desc": "Displays the contents of all ACLs on the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 233,
@@ -3746,9 +3310,7 @@
       "desc": "Displays the contents of all ACLs on the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 234,
@@ -3761,9 +3323,7 @@
       "desc": "Displays the contents of all ACLs on the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 235,
@@ -3776,9 +3336,7 @@
       "desc": "Displays the contents of all IPv4 ACLs",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 236,
@@ -3791,9 +3349,7 @@
       "desc": "Displays the contents of all IPv6 ACLs",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 237,
@@ -3806,9 +3362,7 @@
       "desc": "Creates an entry in the local database with a",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 238,
@@ -3821,9 +3375,7 @@
       "desc": "Displays all configured class maps",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 239,
@@ -3836,9 +3388,7 @@
       "desc": "Displays all configured policy maps",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 240,
@@ -3851,9 +3401,7 @@
       "desc": "Moves to interface configuration",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 241,
@@ -3866,9 +3414,7 @@
       "desc": "Displays information about uRPF drops",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 242,
@@ -3881,9 +3427,7 @@
       "desc": "CONTROL PLANE POLICING (COPP)",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 243,
@@ -3896,9 +3440,7 @@
       "desc": "Checks for Layer 3 connectivity with the device",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 244,
@@ -3911,9 +3453,7 @@
       "desc": "THE PING COMMAND",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 245,
@@ -3926,9 +3466,7 @@
       "desc": "THE PING COMMAND",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 246,
@@ -3941,9 +3479,7 @@
       "desc": "THE PING COMMAND",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 247,
@@ -3956,9 +3492,7 @@
       "desc": "Performs a basic Layer 3 test to IPv4",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 248,
@@ -3971,9 +3505,7 @@
       "desc": "Same as above but through the IP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 249,
@@ -3986,9 +3518,7 @@
       "desc": "The traceroute command (or tracert in Microsoft Windows) is a",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 250,
@@ -4001,9 +3531,7 @@
       "desc": "Shows command with IP host name rather",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 251,
@@ -4016,9 +3544,7 @@
       "desc": "PING COMMANDS",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 252,
@@ -4031,9 +3557,7 @@
       "desc": "Filters messages on the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 253,
@@ -4046,9 +3570,7 @@
       "desc": "Provides basic information about SNMP",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 254,
@@ -4061,9 +3583,7 @@
       "desc": "Provides information about SNMP views",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 255,
@@ -4076,9 +3596,7 @@
       "desc": "SNMP groups",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 256,
@@ -4091,9 +3609,7 @@
       "desc": "It is important for network administrators to implement logging to",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 257,
@@ -4106,9 +3622,7 @@
       "desc": "Verifies status and statistics for NetFlow",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 258,
@@ -4121,9 +3635,7 @@
       "desc": "Verifies status and statistics for NetFlow",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 259,
@@ -4136,9 +3648,7 @@
       "desc": "Displays a summary of NetFlow statistics",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 260,
@@ -4151,9 +3661,7 @@
       "desc": "NetFlow configuration",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 261,
@@ -4166,9 +3674,7 @@
       "desc": "NetFlow exporter configuration",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 262,
@@ -4181,9 +3687,7 @@
       "desc": "Configuration Example: Local SPAN",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 263,
@@ -4196,9 +3700,7 @@
       "desc": "Sets a new SPAN session where the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 264,
@@ -4211,9 +3713,7 @@
       "desc": "Configures session 2 to monitor",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 265,
@@ -4226,9 +3726,7 @@
       "desc": "Configures session 2 to monitor",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 266,
@@ -4241,9 +3739,7 @@
       "desc": "You can use the monitor session",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 267,
@@ -4256,9 +3752,7 @@
       "desc": "VLANs 6 to 10",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 268,
@@ -4271,9 +3765,7 @@
       "desc": "Options for this command include",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 269,
@@ -4286,9 +3778,7 @@
       "desc": "Configuration Example: Remote SPAN",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 270,
@@ -4301,9 +3791,7 @@
       "desc": "Configures session 1 to monitor",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 271,
@@ -4316,9 +3804,7 @@
       "desc": "Configures session 1 to monitor",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 272,
@@ -4331,9 +3817,7 @@
       "desc": "Configures session 1 to have a",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 273,
@@ -4346,9 +3830,7 @@
       "desc": "Configures session 1 to have a",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 274,
@@ -4361,9 +3843,7 @@
       "desc": "ERSPAN Source Configuration",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 275,
@@ -4376,9 +3856,7 @@
       "desc": "Assigns an ERSPAN ID of 1",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 276,
@@ -4391,9 +3869,7 @@
       "desc": "Verifying and Troubleshooting Local and Remote SPAN",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 277,
@@ -4406,9 +3882,7 @@
       "desc": "On some platforms the command is show monitor",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 278,
@@ -4421,9 +3895,7 @@
       "desc": "Displays information about VLANs",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 279,
@@ -4436,9 +3908,7 @@
       "desc": "Displays the status of NTP associations",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 280,
@@ -4451,9 +3921,7 @@
       "desc": "Displays the status of the NTP configuration. This",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 281,
@@ -4466,9 +3934,7 @@
       "desc": "Updates the hardware clock from the",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 282,
@@ -4481,9 +3947,7 @@
       "desc": "Using Time Stamps",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 283,
@@ -4496,9 +3960,7 @@
       "desc": "VLAN",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 284,
@@ -4511,9 +3973,7 @@
       "desc": "VLAN",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 285,
@@ -4526,9 +3986,7 @@
       "desc": "Displays client information learned through",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 286,
@@ -4541,9 +3999,7 @@
       "desc": "Wireless Security and Troubleshooting",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 287,
@@ -4556,9 +4012,7 @@
       "desc": "Wireless Security and Troubleshooting",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 288,
@@ -4571,9 +4025,7 @@
       "desc": "Displays AP detailed configuration settings by",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 289,
@@ -4586,9 +4038,7 @@
       "desc": "Displays general AP configuration",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 290,
@@ -4601,9 +4051,7 @@
       "desc": "Wireless Security and Troubleshooting",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 291,
@@ -4616,9 +4064,7 @@
       "desc": "Wireless Security and Troubleshooting",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 292,
@@ -4631,9 +4077,7 @@
       "desc": "Wireless Security and Troubleshooting",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 293,
@@ -4646,9 +4090,7 @@
       "desc": "Wireless Security and Troubleshooting",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 294,
@@ -4661,9 +4103,7 @@
       "desc": "Displays IPv4 information about",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 295,
@@ -4676,9 +4116,7 @@
       "desc": "Displays IPv4 information about",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 296,
@@ -4691,9 +4129,7 @@
       "desc": "Configuration Example: IPv4 and IPv6 GRE Tunnels with OSPFv3",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 297,
@@ -4706,9 +4142,7 @@
       "desc": "Displays current Internet Key Exchange (IKE)",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 298,
@@ -4721,9 +4155,7 @@
       "desc": "DMVPN Phase 1: Hub Router",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 299,
@@ -4736,9 +4168,7 @@
       "desc": "Displays DMVPN-specific session",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 300,
@@ -4751,9 +4181,7 @@
       "desc": "Displays NHRP mapping information",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 301,
@@ -4766,9 +4194,7 @@
       "desc": "Displays NHRP NHS information",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 302,
@@ -4781,9 +4207,7 @@
       "desc": "VRF CLI format",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 303,
@@ -32519,9 +31943,7 @@
       "desc": "To display general information about Open Shortest Path First (OSPF) routing processes, use the showipospf command in user EXEC or privileged EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2339,
@@ -32534,9 +31956,7 @@
       "desc": "To display the IP Open Shortest Path First (OSPF) events information, use the show ip ospf events command in user EXEC or privileged EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2340,
@@ -32549,9 +31969,7 @@
       "desc": "To display information for an Open Shortest Path First (OSPF) per-prefix loop-free alternate (LFA) fast reroute (FRR) configuration, use the show ip ospf fast-r",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2341,
@@ -32564,9 +31982,7 @@
       "desc": "To display a list of Open Shortest Path First (OSPF) link-state advertisements (LSAs) waiting to be flooded over an interface, use the showipospfflood-listcomma",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2342,
@@ -32579,9 +31995,7 @@
       "desc": "To display interface information related to Open Shortest Path First (OSPF), use the show ip ospf interface command in user EXEC or privileged EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2343,
@@ -32594,9 +32008,7 @@
       "desc": "To display IP Open Shortest Path First (OSPF) max-metric origination information, use the show ip ospf max-metric command in user EXEC or privileged EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2344,
@@ -32609,9 +32021,7 @@
       "desc": "To display interface information about Open Shortest Path First (OSPF) multiarea adjacency, use the show ip ospf multi-area command in user EXEC or privileged E",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2345,
@@ -32624,9 +32034,7 @@
       "desc": "To display Open Shortest Path First (OSPF) neighbor information on a per-interface basis, use the showipospfneighbor command in privileged EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2346,
@@ -32639,9 +32047,7 @@
       "desc": "To display IP Open Shortest Path First (OSPF) nonstop forwarding (NSF) state information, use the show ip ospf nsf command in user EXEC or privileged EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2347,
@@ -32654,9 +32060,7 @@
       "desc": "To display IP Open Shortest Path First (OSPF) nonstop routing (NSR) status information, use the show ip ospf nsr command in privileged EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2348,
@@ -32669,9 +32073,7 @@
       "desc": "To display a list of all link-state advertisements (LSAs) requested by a router, use the showipospfrequest-listcommand in EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2349,
@@ -32684,9 +32086,7 @@
       "desc": "To display a list of all link-state advertisements (LSAs) waiting to be re-sent, use the showipospfretransmission-listcommand in EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2350,
@@ -32699,9 +32099,7 @@
       "desc": "To display information for the Open Shortest Path First (OSPF) local Routing Information Base (RIB) or locally redistributed routes, use the showipospfribcomman",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2351,
@@ -32714,9 +32112,7 @@
       "desc": "To display information about all sham-links configured for a provider edge (PE) router in the Virtual Private Network (VPN) backbone, use the show ip ospf sham-",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2352,
@@ -32729,9 +32125,7 @@
       "desc": "To display Open Shortest Path First (OSPF) shortest path first (SPF) calculation statistics, use the showipospfstatisticscommand in user EXEC or privileged EXEC",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2353,
@@ -32744,9 +32138,7 @@
       "desc": "To display a list of all summary address redistribution information configured under an Open Shortest Path First (OSPF) process, use the showipospfsummary-addre",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2354,
@@ -32759,9 +32151,7 @@
       "desc": "To display all of the link-state advertisements (LSAs) in the rate limit queue, use the showipospftimersrate-limitcommand in privileged EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2355,
@@ -32774,9 +32164,7 @@
       "desc": "To display parameters and the current state of Open Shortest Path First (OSPF) virtual links, use the showipospfvirtual-links command in EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2356,
@@ -32789,9 +32177,7 @@
       "desc": "To display general information about Open Shortest Path First ( OSPF) routing processes, use the show ipv6 ospf command in user EXEC or privileged EXEC mode.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2357,
@@ -32804,9 +32190,7 @@
       "desc": "To ensure compatibility with the showiptraffic command, only checksum errors are displayed.",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2358,
@@ -32819,9 +32203,7 @@
       "desc": "To display information about the Open Shortest Path First version 3 (OSPFv3) multiarea interfaces, use the show ospfv3 multi-area command in user EXEC or privil",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2359,
@@ -32834,9 +32216,7 @@
       "desc": "To display parameters and the current state of Open Shortest Path First version 3 (OSPFv3) sham links, use the show ospfv3 sham-links command in user EXEC or pr",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     },
     {
       "id": 2360,
@@ -32849,9 +32229,7 @@
       "desc": "To run show s that display OSPF information that is useful to Cisco Technical Support personnel in resolving issues, use the show tech-support ospf command in t",
       "kind": "show",
       "read_only": true,
-      "runnable_on": [
-        "frr"
-      ]
+      "runnable_on": []
     }
   ],
   "stats": {
@@ -32861,7 +32239,7 @@
       "Juniper": 1416,
       "Arista": 634
     },
-    "runnable": 945,
+    "runnable": 634,
     "read_only": 2361,
     "curated": 31
   }

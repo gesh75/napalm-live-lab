@@ -13,9 +13,9 @@ an ex-employer NetBox token — both have been removed.
   pass/fail, latency. The honest story:
   | Vendor | Driver | Path | NAPALM |
   |---|---|---|---|
-  | Arista cEOS | `eos` (napalm core) | eAPI / HTTPS | ✅ full (6/6 getters) |
+  | Arista cEOS | `eos` (napalm core) | eAPI / HTTPS | ✅ native (facts/intfs/BGP/LLDP/env/ARP/MAC/instances) |
   | Nokia SR Linux | `srl` (napalm-srl community) | JSON-RPC / gNMI | ✅ facts/intf (get_bgp_neighbors has a known napalm-srl parse gap → ⚠) |
-  | FRR | **none** (no NAPALM driver) | `docker exec vtysh` | exec fallback (facts/intf/BGP; no LLDP/env) |
+  | FRR | **none** (no NAPALM driver) | `docker exec vtysh` | exec fallback (facts/intf/BGP/ARP; no LLDP/env/MAC) |
 
 ## Architecture — why a sidecar
 

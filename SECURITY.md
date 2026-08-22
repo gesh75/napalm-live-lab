@@ -13,7 +13,8 @@ notes below describe the security model and how to harden it if you expose it.
 | **Read-only by default** | Only operational commands (`show`/`display`/`get`/`ping`/…) run by default. Mutating verbs (`configure`, `no`, `delete`, `commit`, `write`, `reload`, `clear`, …) are blocked unless write mode is explicitly enabled. |
 | **No command smuggling** | Commands containing newlines or control characters are rejected, so a second command cannot be appended past the read-only check. Commands are length-capped. |
 | **Pipe-filter allowlist** | The `\|` operator is permitted only as a network-CLI **output filter**. Every post-pipe segment must begin with a known-safe *display* filter (`include`/`exclude`/`section`/`begin`/`count`/`grep`/`json`/…). `redirect` and `append` are filesystem writes and are rejected. Shell escapes such as `show run \| bash <cmd>` are rejected before exec. |
-| **Hard read-only switch** | Set `LAB_CONSOLE_READONLY=1` to disable write mode entirely, regardless of the UI toggle. Recommended for any shared/exposed deployment. |
+| **Hard read-only switch** | Set `LAB_CONSOLE_READONLY=1` to disable write mode entirely, regardless of the UI toggle. The HTTP console additionally requires `LAB_ALLOW_WRITE=1` before it will honor a client `allow_write` flag (fail-closed). |
+| **Classic dashboard XSS** | `/classic` now escapes site names, job fields, and fallback JSON dumps. Prefer the `/lab` console (`textContent`) for device output. Remaining `/classic` renderers still use `innerHTML` for structured HTML tables — do not expose `/classic` beyond localhost. |
 | **No hardcoded secrets** | NetBox URL/token and all device credentials are read from environment variables. The repository contains no real secrets. |
 
 ## Credentials

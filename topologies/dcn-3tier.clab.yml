@@ -1,3 +1,5 @@
+# 3-Tier FRR — config.py uses BARE container names (de-fra-core-01, …).
+# prefix: "" is required here so containerlab does not emit clab-dcn-3tier-*.
 name: dcn-3tier
 prefix: ""
 mgmt:
@@ -8,6 +10,10 @@ topology:
   kinds:
     linux:
       image: quay.io/frrouting/frr:10.1.1
+      binds:
+        - frr/daemons:/etc/frr/daemons
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
 
   nodes:
     de-fra-core-01:

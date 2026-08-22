@@ -387,10 +387,16 @@ def _structural_links(fabric_id: str) -> list[dict]:
     return []
 
 
-def lab_topology(fabric_id: str) -> dict:
+def lab_topology(fabric_id: str, matrix: dict | None = None) -> dict:
+    """Build the fabric diagram payload.
+
+    Pass a precomputed ``matrix`` (from the dashboard TTL cache) so a topology
+    refresh does not re-exec every node. Without it, this collects facts+BGP.
+    """
     if fabric_id not in FABRICS:
         return {"fabric": fabric_id, "nodes": [], "links": [], "error": "unknown fabric"}
-    matrix = napalm_matrix(fabric_id, ["get_facts", "get_bgp_neighbors"])
+    if matrix is None:
+        matrix = napalm_matrix(fabric_id, ["get_facts", "get_bgp_neighbors"])
     nodes = []
     for n in matrix["nodes"]:
         peers = n.get("data", {}).get("get_bgp_neighbors") or {}

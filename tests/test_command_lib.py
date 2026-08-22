@@ -188,6 +188,19 @@ def test_run_passes_command_as_single_argv(fake_exec):
     assert fake_exec["container"] == "clab-clos-evpn-leaf1"
 
 
+def test_shipped_catalog_cisco_not_runnable_on_frr():
+    """The builder was patched; the JSON artifact must match or the UI still lies."""
+    import json
+    from pathlib import Path
+    cat = json.loads((Path(cl.__file__).parent / "command_catalog.json").read_text())
+    bad = [
+        c["cmd"] for c in cat["library"]
+        if str(c.get("vendor", "")).lower() == "cisco" and "frr" in (c.get("runnable_on") or [])
+    ]
+    assert bad == [], f"Cisco still tagged runnable_on FRR: {bad[:5]}"
+    assert cat["stats"]["runnable"] == sum(1 for c in cat["library"] if c.get("runnable_on"))
+
+
 def test_run_newline_blocked_before_exec(fake_exec):
     r = cl.run_command("leaf1", "show version\nreload")
     assert r["ok"] is False and "newline" in r["error"]

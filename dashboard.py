@@ -23,6 +23,7 @@ import os
 import re
 import json
 import time
+import uuid
 import difflib
 import ipaddress
 import threading
@@ -105,7 +106,7 @@ _jobs_lock = threading.Lock()
 
 
 def _new_job(job_type: str, site: str) -> str:
-    job_id = f"{job_type}_{site}_{int(time.time())}"
+    job_id = f"{job_type}_{site}_{uuid.uuid4().hex[:12]}"
     with _jobs_lock:
         _jobs[job_id] = {
             "id": job_id,
@@ -190,18 +191,23 @@ _matrix_cache: dict = {}
 _MATRIX_TTL = float(os.getenv("LAB_CACHE_TTL", "12"))
 
 
+def _cached_matrix(fabric: str) -> dict:
+    """Single collect path for matrix + topology. Topology must not re-exec."""
+    now = time.time()
+    hit = _matrix_cache.get(fabric)
+    if hit and now - hit[0] < _MATRIX_TTL:
+        return hit[1]
+    data = napalm_matrix(fabric)
+    _matrix_cache[fabric] = (now, data)
+    return data
+
+
 @app.route("/api/lab/matrix")
 def api_lab_matrix():
     fabric = (request.args.get("fabric") or "all").lower()
     if fabric != "all" and fabric not in FABRICS:
         return jsonify({"error": f"unknown fabric: {fabric}"}), 400
-    now = time.time()
-    hit = _matrix_cache.get(fabric)
-    if hit and now - hit[0] < _MATRIX_TTL:
-        return jsonify(hit[1])
-    data = napalm_matrix(fabric)
-    _matrix_cache[fabric] = (now, data)
-    return jsonify(data)
+    return jsonify(_cached_matrix(fabric))
 
 
 @app.route("/api/lab/topology")
@@ -209,7 +215,9 @@ def api_lab_topology():
     fabric = (request.args.get("fabric") or "clos").lower()
     if fabric not in FABRICS:
         return jsonify({"error": f"unknown fabric: {fabric}"}), 400
-    return jsonify(lab_topology(fabric))
+    # Derive the diagram from the cached full matrix — do not collect twice.
+    matrix = _cached_matrix(fabric)
+    return jsonify(lab_topology(fabric, matrix))
 
 
 @app.route("/api/lab/node/<hostname>")

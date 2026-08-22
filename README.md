@@ -170,6 +170,7 @@ A curated catalog of **2,361 single-line operational commands** runs live agains
 | Metric | Value |
 |---|---|
 | Total commands | 2,361 |
+| Live-runnable on this fabric | 634 (Arista cEOS). Cisco 311 + Juniper 1,416 are reference-only. |
 | Read-only (default-runnable) | 2,361 |
 | By vendor | Juniper 1,416 · Arista 634 · Cisco 311 |
 | Curated highlights | 31 |

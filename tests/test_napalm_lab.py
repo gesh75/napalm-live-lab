@@ -55,6 +55,26 @@ class TestSecurityAndConfig:
         expected = set(config.FABRICS["clos"]["nodes"]) | set(config.FABRICS["dcn"]["nodes"])
         assert set(config.NODE_INDEX) == expected, "NODE_INDEX keys must match all fabric node names"
 
+    def test_clos_container_names_match_default_clab_prefix(self):
+        src = (PKG_DIR / "topologies" / "clos-evpn.clab.yml").read_text(encoding="utf-8")
+        head = src.split("topology:")[0]
+        yaml_keys = [ln.strip() for ln in head.splitlines() if ln.strip() and not ln.strip().startswith("#")]
+        assert not any(k.startswith("prefix:") for k in yaml_keys), "CLOS must use the default clab prefix so names are clab-clos-evpn-<node>"
+        for name, node in config.FABRICS["clos"]["nodes"].items():
+            assert node["container"] == f"clab-clos-evpn-{name}", node["container"]
+
+    def test_dcn_container_names_are_bare_with_empty_prefix(self):
+        src = (PKG_DIR / "topologies" / "dcn-3tier.clab.yml").read_text(encoding="utf-8")
+        head = src.split("topology:")[0]
+        assert 'prefix: ""' in head
+        for name, node in config.FABRICS["dcn"]["nodes"].items():
+            assert node["container"] == name
+
+    def test_relab_deploys_from_topo_file_dir(self):
+        src = (PKG_DIR / "relab.sh").read_text(encoding="utf-8")
+        assert '-w "$CLAB_DIR/topologies"' not in src
+        assert "clab_deploy" in src
+
     def test_no_hardcoded_secret_in_config_source(self):
         src = Path(config.__file__).read_text(encoding="utf-8")
         lowered = src.lower()
