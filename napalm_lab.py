@@ -28,6 +28,7 @@ from datetime import datetime
 from config import (
     FABRICS, NODE_INDEX, NAPALM_SUPPORT, STANDARD_GETTERS,
     RUNNER_CONTAINER, EOS_USER, EOS_PASS, SRL_USER, SRL_PASS,
+    is_safe_getter, safe_getters,
 )
 
 def _find_docker() -> str:
@@ -158,9 +159,9 @@ def _frr_collect(node: dict, getters: list[str]) -> dict:
             if isinstance(j, dict):
                 for name, idata in j.items():
                     ifaces[name] = {
-                        "is_up": str(idata.get("administrativeStatus", idata.get("operationalStatus", ""))).lower() in ("up", "true")
-                                 or idata.get("operationalStatus", "").lower() == "up",
-                        "is_enabled": idata.get("administrativeStatus", "up").lower() == "up",
+                        "is_up": str(idata.get("administrativeStatus") or idata.get("operationalStatus") or "").lower() in ("up", "true")
+                                 or str(idata.get("operationalStatus") or "").lower() == "up",
+                        "is_enabled": str(idata.get("administrativeStatus") or "up").lower() == "up",
                         "description": idata.get("description", ""),
                         "speed": idata.get("speed", 0) or 0,
                         "mac_address": idata.get("hardwareAddress", ""),
@@ -193,6 +194,16 @@ def _frr_collect(node: dict, getters: list[str]) -> dict:
         elif g == "get_environment":
             data["get_environment"] = {}
             mark("get_environment", False, "not available via vtysh")
+        elif g == "get_arp_table":
+            j, e = _vtysh_json(container, "show ip arp")
+            data["get_arp_table"] = j if j is not None else []
+            mark("get_arp_table", j is not None, None if j is not None else (e or "no arp"))
+        elif g == "get_mac_address_table":
+            data["get_mac_address_table"] = []
+            mark("get_mac_address_table", False, "FRR is L3-only — no MAC table")
+        elif g == "get_network_instances":
+            data["get_network_instances"] = {}
+            mark("get_network_instances", False, "FRR has no VRF getter via vtysh")
         else:
             mark(g, False, "unsupported")
 
@@ -225,15 +236,45 @@ def _ceos_exec_fallback(node: dict, getters: list[str]) -> dict:
             "error": None if reachable else "cEOS unreachable (eAPI + exec)"}
 
 
+def _srl_exec_fallback(node: dict, getters: list[str]) -> dict:
+    """When SR Linux JSON-RPC is down, still pull version via sr_cli."""
+    container = node["container"]
+    rc, out, _ = _docker_exec(container, ["sr_cli", "show version"], timeout=15)
+    facts = {"hostname": node["hostname"], "vendor": "Nokia", "model": node.get("model", "SR Linux"),
+             "os_version": "-", "serial_number": "-", "uptime": -1, "interface_list": []}
+    reachable = rc == 0
+    if reachable and out:
+        for line in out.splitlines():
+            if "Software Version" in line or "software" in line.lower():
+                facts["os_version"] = line.split(":")[-1].strip()[:40] or facts["os_version"]
+    gstatus = {g: {"ok": g == "get_facts" and reachable,
+                   "error": None if (g == "get_facts" and reachable) else "JSON-RPC down — exec fallback"}
+               for g in getters}
+    return {"ok": reachable, "reachable": reachable, "method": "exec",
+            "driver": "srl", "facts": facts, "data": {"get_facts": facts}, "getters": gstatus,
+            "error": None if reachable else "SRL unreachable (JSON-RPC + exec)"}
+
+
 # ── unified per-node collection ──────────────────────────────────────────────────
 
 def collect_node(hostname: str, getters: list[str] | None = None) -> dict:
-    """Collect one lab node. Returns a rich matrix-ready dict."""
-    getters = getters or STANDARD_GETTERS
+    """Collect one lab node. Returns a rich matrix-ready dict. Never raises."""
+    getters = safe_getters(getters)
     node = NODE_INDEX.get(hostname)
     if not node:
         return {"hostname": hostname, "error": "unknown node", "reachable": False}
 
+    try:
+        return _collect_node_inner(hostname, node, getters)
+    except Exception as e:  # noqa: BLE001 — API must never 500 on a single node
+        return {"hostname": hostname, "error": str(e)[:300], "reachable": False,
+                "container": node.get("container"), "ip": node.get("ip"),
+                "fabric": node.get("fabric"), "tier": node.get("tier"),
+                "vendor": node.get("vendor"), "driver": node.get("driver"),
+                "getters": {}, "data": {}, "facts": {}}
+
+
+def _collect_node_inner(hostname: str, node: dict, getters: list[str]) -> dict:
     driver = node["driver"]
     support = NAPALM_SUPPORT.get(driver, NAPALM_SUPPORT["none"])
     t0 = time.time()
@@ -244,6 +285,8 @@ def collect_node(hostname: str, getters: list[str] | None = None) -> dict:
         res = _runner_collect(node, getters)
         if not res.get("reachable") and driver == "eos":
             res = _ceos_exec_fallback(node, getters)  # graceful: eAPI down
+        elif not res.get("reachable") and driver == "srl":
+            res = _srl_exec_fallback(node, getters)  # graceful: JSON-RPC down
     else:
         res = {"ok": False, "reachable": False, "method": "napalm",
                "error": f"unhandled driver {driver}", "data": {}, "getters": {}, "facts": {}}
@@ -343,10 +386,16 @@ def _structural_links(fabric_id: str) -> list[dict]:
     return []
 
 
-def lab_topology(fabric_id: str) -> dict:
+def lab_topology(fabric_id: str, matrix: dict | None = None) -> dict:
+    """Build the fabric diagram payload.
+
+    Pass a precomputed ``matrix`` (from the dashboard TTL cache) so a topology
+    refresh does not re-exec every node. Without it, this collects facts+BGP.
+    """
     if fabric_id not in FABRICS:
         return {"fabric": fabric_id, "nodes": [], "links": [], "error": "unknown fabric"}
-    matrix = napalm_matrix(fabric_id, ["get_facts", "get_bgp_neighbors"])
+    if matrix is None:
+        matrix = napalm_matrix(fabric_id, ["get_facts", "get_bgp_neighbors"])
     nodes = []
     for n in matrix["nodes"]:
         peers = n.get("data", {}).get("get_bgp_neighbors") or {}

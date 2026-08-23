@@ -31,6 +31,7 @@ Rules enforced here:
 """
 
 import json
+import re
 import sys
 import time
 import traceback
@@ -43,7 +44,21 @@ DEFAULT_GETTERS = [
     "get_bgp_neighbors",
     "get_lldp_neighbors",
     "get_environment",
+    "get_arp_table",
+    "get_mac_address_table",
+    "get_network_instances",
 ]
+
+# Fail-closed: only NAPALM getter names. Never getattr(device, "commit_config").
+_GETTER_NAME_RE = re.compile(r"^get_[a-z][a-z0-9_]*$")
+
+
+def _safe_getters(names):
+    out = []
+    for n in names or []:
+        if isinstance(n, str) and _GETTER_NAME_RE.fullmatch(n):
+            out.append(n)
+    return out or list(DEFAULT_GETTERS)
 
 # napalm get_facts keys we surface into the flat "facts" object.
 FACTS_KEYS = (
@@ -146,9 +161,9 @@ def main():
     driver = (req.get("driver") or "").strip().lower()
     username = req.get("username") or ""
     password = req.get("password") or ""
-    getters = req.get("getters") or DEFAULT_GETTERS
-    if not isinstance(getters, list):
-        getters = DEFAULT_GETTERS
+    getters = _safe_getters(req.get("getters") or DEFAULT_GETTERS)
+    if not isinstance(req.get("getters"), (list, type(None))):
+        getters = list(DEFAULT_GETTERS)
 
     result = _base_result(driver)
 
@@ -196,6 +211,10 @@ def main():
         any_ok = False
         for name in getters:
             entry = {"ok": False, "error": None}
+            if not _GETTER_NAME_RE.fullmatch(name or ""):
+                entry["error"] = "rejected: not a NAPALM getter"
+                result["getters"][name] = entry
+                continue
             fn = getattr(device, name, None)
             if fn is None or not callable(fn):
                 entry["error"] = "getter not available on driver"

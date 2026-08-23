@@ -23,11 +23,14 @@ import os
 import re
 import json
 import time
+import uuid
 import difflib
 import ipaddress
 import threading
 from datetime import datetime
 from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
@@ -39,6 +42,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from config import (
     SITES, FABRICS, NODE_INDEX, OUTPUT_DIR,
     SSH_USER, SSH_KEY, NETBOX_URL, NETBOX_TOKEN, ZTASID,
+    is_safe_getter,
 )
 # Collection is now backed by the live containerlab fabrics via the napalm-runner
 # sidecar (real NAPALM for eos/srl) + docker exec (FRR). These drop-in shims keep
@@ -58,15 +62,20 @@ from checks import CheckResult, evaluate_check, resolve_targets
 from checks_builtin import BUILTIN_CHECKS
 from runner import run_suite
 from suites import load_all_suites, load_suite, suite_summary, SUITES_DIR
-# NetBox helpers remain available for the (now optional) netbox-audit tool.
-from core import (
-    open_device,
-    nb_get, nb_get_prefixes, nb_get_devices, nb_get_vlans,
-    extract_live_networks, compare_prefixes,
-)
+# NetBox helpers are optional. core.py imports napalm, which the host does not
+# need — live collection goes through the sidecar. Import lazily so the
+# dashboard starts with Flask + docker exec only.
+try:
+    from core import (  # noqa: F401
+        nb_get, nb_get_prefixes, nb_get_devices, nb_get_vlans,
+        extract_live_networks, compare_prefixes,
+    )
+except Exception:  # noqa: BLE001 — dashboard must boot without host napalm
+    nb_get = nb_get_prefixes = nb_get_devices = nb_get_vlans = None
+    extract_live_networks = compare_prefixes = None
 
-app = Flask(__name__, static_folder=".", static_url_path="/static")
-CORS(app)
+app = Flask(__name__, static_folder=None)
+CORS(app, origins=["http://127.0.0.1:5959", "http://localhost:5959"])
 
 SNAPSHOTS_DIR = OUTPUT_DIR / "snapshots"
 SNAPSHOTS_DIR.mkdir(exist_ok=True)
@@ -100,7 +109,7 @@ _jobs_lock = threading.Lock()
 
 
 def _new_job(job_type: str, site: str) -> str:
-    job_id = f"{job_type}_{site}_{int(time.time())}"
+    job_id = f"{job_type}_{site}_{uuid.uuid4().hex[:12]}"
     with _jobs_lock:
         _jobs[job_id] = {
             "id": job_id,
@@ -126,18 +135,18 @@ def _update_job(job_id: str, **kwargs):
 @app.route("/")
 def index():
     # The Live Lab view (matrix + Command Console + topology) is now the home page.
-    return send_from_directory(".", "lab.html")
+    return send_from_directory(HERE, "lab.html")
 
 
 @app.route("/classic")
 def classic():
     # The classic audit/snapshot tools dashboard.
-    return send_from_directory(".", "dashboard.html")
+    return send_from_directory(HERE, "dashboard.html")
 
 
 @app.route("/dashboard.js")
 def serve_js():
-    return send_from_directory(".", "dashboard.js")
+    return send_from_directory(HERE, "dashboard.js")
 
 
 # ── Live Lab view (CLOS-EVPN + 3-Tier vs NAPALM) ────────────────────────────────
@@ -149,17 +158,17 @@ def favicon():
 
 @app.route("/lab")
 def lab_page():
-    return send_from_directory(".", "lab.html")
+    return send_from_directory(HERE, "lab.html")
 
 
 @app.route("/lab.js")
 def lab_js():
-    return send_from_directory(".", "lab.js")
+    return send_from_directory(HERE, "lab.js")
 
 
 @app.route("/lab.css")
 def lab_css():
-    return send_from_directory(".", "lab.css")
+    return send_from_directory(HERE, "lab.css")
 
 
 @app.route("/api/lab/fabrics")
@@ -181,12 +190,27 @@ def api_lab_fabrics():
     return jsonify({"fabrics": fabrics, "runner_up": runner_available()})
 
 
+_matrix_cache: dict = {}
+_MATRIX_TTL = float(os.getenv("LAB_CACHE_TTL", "12"))
+
+
+def _cached_matrix(fabric: str) -> dict:
+    """Single collect path for matrix + topology. Topology must not re-exec."""
+    now = time.time()
+    hit = _matrix_cache.get(fabric)
+    if hit and now - hit[0] < _MATRIX_TTL:
+        return hit[1]
+    data = napalm_matrix(fabric)
+    _matrix_cache[fabric] = (now, data)
+    return data
+
+
 @app.route("/api/lab/matrix")
 def api_lab_matrix():
     fabric = (request.args.get("fabric") or "all").lower()
     if fabric != "all" and fabric not in FABRICS:
         return jsonify({"error": f"unknown fabric: {fabric}"}), 400
-    return jsonify(napalm_matrix(fabric))
+    return jsonify(_cached_matrix(fabric))
 
 
 @app.route("/api/lab/topology")
@@ -194,7 +218,16 @@ def api_lab_topology():
     fabric = (request.args.get("fabric") or "clos").lower()
     if fabric not in FABRICS:
         return jsonify({"error": f"unknown fabric: {fabric}"}), 400
-    return jsonify(lab_topology(fabric))
+    # Prefer slicing the cached "all" matrix so a default refresh (matrix=all
+    # + topology=clos + topology=dcn) does not collect three times.
+    now = time.time()
+    all_hit = _matrix_cache.get("all")
+    if all_hit and now - all_hit[0] < _MATRIX_TTL:
+        nodes = [n for n in all_hit[1].get("nodes", []) if n.get("fabric") == fabric]
+        matrix = {**all_hit[1], "fabric": fabric, "nodes": nodes}
+        return jsonify(lab_topology(fabric, matrix))
+    matrix = _cached_matrix(fabric)
+    return jsonify(lab_topology(fabric, matrix))
 
 
 @app.route("/api/lab/node/<hostname>")
@@ -230,7 +263,10 @@ def api_lab_run():
     body = request.get_json(silent=True) or {}
     hostname = (body.get("hostname") or "").strip()
     command = body.get("command") or ""
-    allow_write = bool(body.get("allow_write"))
+    allow_write = (
+        bool(body.get("allow_write"))
+        and os.getenv("LAB_ALLOW_WRITE", "0").lower() in ("1", "true", "yes")
+    )
     if not hostname or not command:
         return jsonify({"error": "hostname and command are required"}), 400
     if hostname not in NODE_INDEX:
@@ -318,8 +354,10 @@ def api_test_assert():
     elif "intent" in src:
         root = run_intent(hostname, src["intent"])
     else:
-        getters = [src["getter"]] if "getter" in src else ["get_facts"]
-        root = collect_node(hostname, getters)
+        getter = src["getter"] if "getter" in src else "get_facts"
+        if not is_safe_getter(getter):
+            return jsonify({"error": f"rejected getter '{getter}' — only get_* NAPALM getters are allowed"}), 400
+        root = collect_node(hostname, [getter])
     ar = evaluate_check(check, root)
     return jsonify({"hostname": hostname, "field": check.field, "op": check.op,
                     "quantifier": check.quantifier, "expected": check.expected,
@@ -364,7 +402,11 @@ def api_test_run():
 @app.route("/api/test/runs")
 def api_test_runs():
     sid = request.args.get("suite_id")
-    limit = min(int(request.args.get("limit", 50)), 200)
+    limit_raw = request.args.get("limit", "50")
+    try:
+        limit = min(max(int(limit_raw), 1), 200)
+    except (TypeError, ValueError):
+        return jsonify({"error": "limit must be an integer"}), 400
     return jsonify({"runs": results_store.list_runs(limit=limit, suite_id=sid)})
 
 
@@ -614,6 +656,8 @@ def netbox_audit():
     site = data.get("site", "").lower()
     if not site or site not in SITES:
         return jsonify({"error": f"Unknown site: {site}"}), 400
+    if nb_get_prefixes is None or not NETBOX_URL:
+        return jsonify({"error": "NetBox helpers unavailable (no host napalm / NETBOX_URL)"}), 501
 
     job_id = _new_job("netbox_audit", site)
 
@@ -731,19 +775,24 @@ def env_health():
                             "critical": data.get("is_critical", False),
                         })
 
-                # Fans
-                fans = env.get("fans", {})
-                fan_ok = all(v.get("status", True) for v in fans.values())
-                if not fan_ok:
-                    alerts.append({"hostname": hostname, "type": "fan",
-                                   "sensor": "fans", "value": "FAILED", "critical": True})
+                # Fans / power — empty dict is UNKNOWN, not healthy (all([]) is True).
+                fans = env.get("fans") or None
+                if fans is None or fans == {}:
+                    fan_ok = None
+                else:
+                    fan_ok = all(v.get("status", True) for v in fans.values())
+                    if fan_ok is False:
+                        alerts.append({"hostname": hostname, "type": "fan",
+                                       "sensor": "fans", "value": "FAILED", "critical": True})
 
-                # Power
-                power = env.get("power", {})
-                power_ok = all(v.get("status", True) for v in power.values())
-                if not power_ok:
-                    alerts.append({"hostname": hostname, "type": "power",
-                                   "sensor": "power", "value": "FAILED", "critical": True})
+                power = env.get("power") or None
+                if power is None or power == {}:
+                    power_ok = None
+                else:
+                    power_ok = all(v.get("status", True) for v in power.values())
+                    if power_ok is False:
+                        alerts.append({"hostname": hostname, "type": "power",
+                                       "sensor": "power", "value": "FAILED", "critical": True})
 
                 # High CPU/memory
                 if max_cpu > 80:

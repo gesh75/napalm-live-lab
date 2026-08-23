@@ -55,6 +55,38 @@ class TestSecurityAndConfig:
         expected = set(config.FABRICS["clos"]["nodes"]) | set(config.FABRICS["dcn"]["nodes"])
         assert set(config.NODE_INDEX) == expected, "NODE_INDEX keys must match all fabric node names"
 
+    def test_clos_container_names_match_default_clab_prefix(self):
+        src = (PKG_DIR / "topologies" / "clos-evpn.clab.yml").read_text(encoding="utf-8")
+        head = src.split("topology:")[0]
+        yaml_keys = [ln.strip() for ln in head.splitlines() if ln.strip() and not ln.strip().startswith("#")]
+        assert not any(k.startswith("prefix:") for k in yaml_keys), "CLOS must use the default clab prefix so names are clab-clos-evpn-<node>"
+        for name, node in config.FABRICS["clos"]["nodes"].items():
+            assert node["container"] == f"clab-clos-evpn-{name}", node["container"]
+
+    def test_dcn_container_names_are_bare_with_empty_prefix(self):
+        src = (PKG_DIR / "topologies" / "dcn-3tier.clab.yml").read_text(encoding="utf-8")
+        head = src.split("topology:")[0]
+        assert 'prefix: ""' in head
+        for name, node in config.FABRICS["dcn"]["nodes"].items():
+            assert node["container"] == name
+
+    def test_relab_deploys_from_topo_file_dir(self):
+        src = (PKG_DIR / "relab.sh").read_text(encoding="utf-8")
+        assert '-w "$CLAB_DIR/topologies"' not in src
+        assert "clab_deploy" in src
+        assert "clab_deploy \"$DCN_FILE\" --reconfigure" in src
+
+    def test_topology_sidecar_files_exist(self):
+        assert (PKG_DIR / "topologies" / "startup" / "ceos.cfg").is_file()
+        assert (PKG_DIR / "topologies" / "frr" / "daemons").is_file()
+
+    def test_commit_config_is_not_a_safe_getter(self):
+        assert config.is_safe_getter("get_facts") is True
+        assert config.is_safe_getter("commit_config") is False
+        assert config.is_safe_getter("rollback") is False
+        assert config.is_safe_getter("cli") is False
+        assert config.safe_getters(["commit_config", "get_facts"]) == ["get_facts"]
+
     def test_no_hardcoded_secret_in_config_source(self):
         src = Path(config.__file__).read_text(encoding="utf-8")
         lowered = src.lower()
@@ -213,6 +245,10 @@ def make_fake_docker_exec(reachable_frr_containers=None):
             v = {"version": "4.33.1F", "modelName": "cEOS", "serialNumber": "ABC", "uptime": 42}
             return 0, json.dumps(v), ""
 
+        # ── SRL exec fallback via sr_cli ──
+        if argv[:1] == ["sr_cli"]:
+            return 0, "Hostname : spine1\nSoftware Version : v24.7.2\n", ""
+
         return 1, "", f"unhandled exec: {container} {joined}"
 
     return fake
@@ -263,13 +299,14 @@ class TestCollectNodeHermetic:
         assert r["getters"]["get_lldp_neighbors"]["ok"] is False
         assert r["getters"]["get_environment"]["ok"] is False
 
-    def test_srl_runner_failure_surfaces_unreachable(self, patch_docker):
-        # srl has no eos exec fallback, so a failed runner stays unreachable.
+    def test_srl_falls_back_to_exec_when_runner_down(self, patch_docker):
+        # srl JSON-RPC fails in the default fake; sr_cli exec fallback keeps the node reachable.
         r = napalm_lab.collect_node("spine1")  # nokia / srl
         assert r["driver"] == "srl"
         assert r["napalm_supported"] is True
-        assert r["reachable"] is False
-        assert r["error"], "failed srl runner should carry an error string"
+        assert r["reachable"] is True
+        assert r["method"] == "exec"
+        assert r["getters"]["get_facts"]["ok"] is True
 
     def test_eos_falls_back_to_exec_when_runner_down(self, monkeypatch):
         # Runner fails for eos too -> _ceos_exec_fallback kicks in via `Cli`.
@@ -332,12 +369,12 @@ class TestMatrixMath:
             assert 0 <= gs["ok"] <= gs["total"]
 
     def test_matrix_native_vs_fallback_split(self, patch_docker):
-        # default fake: 3 eos via runner (napalm), 13 frr via exec, srl(3) unreachable.
+        # default fake: 3 eos via runner (napalm), 13 frr via exec, 3 srl via sr_cli fallback.
         m = napalm_lab.napalm_matrix("all")
         s = m["summary"]
         assert s["napalm_native"] == 3, "only the 3 eos nodes go native in the default fake"
-        assert s["exec_fallback"] == 13, "13 FRR nodes use exec fallback"
-        assert s["reachable"] == 16, "16 reachable (3 eos + 13 frr); srl down"
+        assert s["exec_fallback"] == 16, "13 FRR + 3 SRL exec fallback"
+        assert s["reachable"] == 19, "all 19 reachable (srl now has exec fallback)"
 
     def test_matrix_clos_only(self, patch_docker):
         m = napalm_lab.napalm_matrix("clos")

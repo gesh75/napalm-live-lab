@@ -1,0 +1,60 @@
+# 3-Tier FRR — config.py uses BARE container names (de-fra-core-01, …).
+# prefix: "" is required here so containerlab does not emit clab-dcn-3tier-*.
+name: dcn-3tier
+prefix: ""
+mgmt:
+  network: dcn-lab
+  ipv4-subnet: 10.200.0.0/24
+
+topology:
+  kinds:
+    linux:
+      image: quay.io/frrouting/frr:10.1.1
+      binds:
+        - frr/daemons:/etc/frr/daemons
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+
+  nodes:
+    de-fra-core-01:
+      kind: linux
+      mgmt-ipv4: 10.200.0.11
+    de-fra-core-02:
+      kind: linux
+      mgmt-ipv4: 10.200.0.12
+    uk-lon-core-01:
+      kind: linux
+      mgmt-ipv4: 10.200.0.13
+    nl-ams-core-01:
+      kind: linux
+      mgmt-ipv4: 10.200.0.14
+    us-nyc-core-01:
+      kind: linux
+      mgmt-ipv4: 10.200.0.15
+    de-fra-edge-01:
+      kind: linux
+      mgmt-ipv4: 10.200.0.21
+    uk-lon-edge-01:
+      kind: linux
+      mgmt-ipv4: 10.200.0.22
+    nl-ams-edge-01:
+      kind: linux
+      mgmt-ipv4: 10.200.0.23
+    uk-lon-dist-01:
+      kind: linux
+      mgmt-ipv4: 10.200.0.31
+    de-fra-dist-01:
+      kind: linux
+      mgmt-ipv4: 10.200.0.33
+
+  links:
+    - endpoints: ["de-fra-core-01:eth1", "de-fra-core-02:eth1"]
+    - endpoints: ["de-fra-core-01:eth2", "uk-lon-core-01:eth1"]
+    - endpoints: ["de-fra-core-02:eth2", "nl-ams-core-01:eth1"]
+    - endpoints: ["de-fra-core-01:eth3", "us-nyc-core-01:eth1"]
+    - endpoints: ["de-fra-core-01:eth4", "de-fra-edge-01:eth1"]
+    - endpoints: ["de-fra-core-02:eth3", "de-fra-edge-01:eth2"]
+    - endpoints: ["uk-lon-core-01:eth2", "uk-lon-edge-01:eth1"]
+    - endpoints: ["nl-ams-core-01:eth2", "nl-ams-edge-01:eth1"]
+    - endpoints: ["uk-lon-core-01:eth3", "uk-lon-dist-01:eth1"]
+    - endpoints: ["de-fra-core-01:eth5", "de-fra-dist-01:eth1"]
