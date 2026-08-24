@@ -836,7 +836,7 @@
     setText("tsFail", t.failed); setText("tsErr", t.errored);
     tShow("testStats", "");
 
-    const pass = (t.failed || 0) === 0 && (t.errored || 0) === 0;
+    const pass = (t.total || 0) > 0 && (t.failed || 0) === 0 && (t.errored || 0) === 0;
     const v = document.getElementById("testVerdict");
     if (v) {
       v.style.display = "";

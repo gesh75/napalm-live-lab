@@ -111,6 +111,24 @@ def test_run_suite_aggregates(monkeypatch):
     assert run.totals["passed"] == run.totals["total"]  # all green with fake data
 
 
+def test_run_suite_fails_closed_when_no_hosts_match():
+    """evpn_bgp targets only clos nodes — a dcn filter must not report done/green."""
+    suite = S.load_all_suites()["evpn_bgp"]
+    run = RUN.run_suite(suite, fabric_filter="dcn")
+    assert run.status == "error"
+    assert run.totals["total"] == 0
+    assert run.results == []
+    assert "zero hosts" in (run.error or "")
+
+
+def test_run_suite_fails_closed_on_unknown_fabric():
+    suite = S.load_all_suites()["fabric_health"]
+    run = RUN.run_suite(suite, fabric_filter="nope")
+    assert run.status == "error"
+    assert run.totals["total"] == 0
+    assert "zero hosts" in (run.error or "")
+
+
 # ── results store (temp db) ─────────────────────────────────────────────────
 
 def test_results_roundtrip(monkeypatch, tmp_path):
@@ -141,3 +159,19 @@ def test_exporters():
     html = EX.to_html(run)
     assert "<table" in html and "FAILED" in html
     assert EX.to_json(run)["run_id"] == "run_x"
+
+
+def test_exporters_fail_closed_on_empty_run():
+    """JUnit/HTML must not look green when zero checks ran."""
+    run = {"run_id": "run_empty", "suite_id": "evpn_bgp", "suite_name": "CLOS-EVPN BGP",
+           "fabric": "dcn", "started": "t", "finished": "t", "status": "error",
+           "error": "no checks executed — fabric filter or target selector matched zero hosts",
+           "totals": {"passed": 0, "failed": 0, "errored": 0, "total": 0},
+           "results": []}
+    xml = EX.to_junit(run)
+    assert 'tests="1"' in xml
+    assert 'errors="1"' in xml
+    assert "<error" in xml
+    html = EX.to_html(run)
+    assert "FAILED" in html
+    assert "PASSED" not in html

@@ -10,18 +10,38 @@ def to_json(run: dict) -> dict:
     return run
 
 
+def _vacuous(run: dict, totals: dict, results: list) -> bool:
+    """True when the run executed nothing, or the runner already marked error."""
+    return (run.get("status") == "error"
+            or not results
+            or int(totals.get("total", 0) or 0) == 0)
+
+
 def to_junit(run: dict) -> str:
     """JUnit XML — directly consumable by Jenkins / GitHub Actions / GitLab CI."""
     t = run.get("totals", {})
     results = run.get("results", [])
+    vacuous = _vacuous(run, t, results)
+    # An empty/errored run must emit at least one <error> testcase. Many CI
+    # parsers treat tests="0" failures="0" as success even when status=error.
+    tests = 1 if vacuous else t.get("total", 0)
+    failures = t.get("failed", 0)
+    errors = 1 if vacuous else t.get("errored", 0)
     lines = ['<?xml version="1.0" encoding="UTF-8"?>']
     lines.append(
         f'<testsuites name={quoteattr(run.get("suite_name",""))} '
-        f'tests="{t.get("total",0)}" failures="{t.get("failed",0)}" errors="{t.get("errored",0)}">')
+        f'tests="{tests}" failures="{failures}" errors="{errors}">')
     lines.append(
         f'  <testsuite name={quoteattr(run.get("suite_id",""))} '
-        f'tests="{t.get("total",0)}" failures="{t.get("failed",0)}" errors="{t.get("errored",0)}" '
+        f'tests="{tests}" failures="{failures}" errors="{errors}" '
         f'timestamp={quoteattr(run.get("started",""))}>')
+    if vacuous:
+        err = run.get("error") or "no checks executed"
+        lines.append(
+            f'    <testcase name="suite_executed" classname={quoteattr(run.get("suite_id",""))}>')
+        lines.append(
+            f'      <error message={quoteattr(err)}>{escape(str(err))}</error>')
+        lines.append('    </testcase>')
     for r in results:
         name = f'{r.get("name","")} [{r.get("hostname","")}]'
         cls = r.get("check_id", "")
@@ -43,7 +63,11 @@ def to_junit(run: dict) -> str:
 def to_html(run: dict) -> str:
     """Self-contained dark HTML report (GitHub-dark palette)."""
     t = run.get("totals", {})
-    status_color = "#3fb950" if t.get("failed", 0) == 0 and t.get("errored", 0) == 0 else "#f85149"
+    results = run.get("results", [])
+    passed = (not _vacuous(run, t, results)
+              and t.get("failed", 0) == 0
+              and t.get("errored", 0) == 0)
+    status_color = "#3fb950" if passed else "#f85149"
     rows = []
     for r in run.get("results", []):
         if r.get("errored"):
