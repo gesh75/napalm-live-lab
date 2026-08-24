@@ -895,7 +895,7 @@
       return;
     }
     for (const r of runs) {
-      const pass = (r.failed || 0) === 0 && (r.errored || 0) === 0 && r.status === "done";
+      const pass = (r.total || 0) > 0 && (r.failed || 0) === 0 && (r.errored || 0) === 0 && r.status === "done";
       const resultTxt = r.status !== "done" ? r.status : (pass ? "PASS" : "FAIL");
       body.appendChild(el("tr", { class: "hist-row" }, [
         el("td", { style: { color: C.sub, fontFamily: "ui-monospace, monospace", fontSize: "12px" } }, txt(r.started)),
