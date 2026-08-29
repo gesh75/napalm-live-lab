@@ -2,11 +2,16 @@
 
 **An honest, live multivendor coverage matrix for NAPALM — plus a safe-by-default command console — running entirely in containerlab on one laptop.**
 
+**Docs:** [gesh75.github.io/napalm-live-lab](https://gesh75.github.io/napalm-live-lab/) · **Security:** [SECURITY.md](./SECURITY.md) · **CI:** [hermetic pytest on every push/PR](https://github.com/gesh75/napalm-live-lab/actions/workflows/ci.yml)
+
+> **Shipped lab:** 19 nodes · 3 vendors (Arista cEOS, Nokia SR Linux, FRRouting). Junos is a core NAPALM driver in `DRIVER_MAP` and is **not** in the containerlab topology. A cRPD leaf, gNMI subscribe, and a `napalm-frr` stub are the next fabric increment — this README does not claim they are deployed.
+
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 [![NAPALM](https://img.shields.io/badge/NAPALM-4.1%2B-2C8EBB)](https://napalm.readthedocs.io/)
 [![containerlab](https://img.shields.io/badge/containerlab-multivendor-0E7FC0?logo=docker&logoColor=white)](https://containerlab.dev/)
-[![tests](https://img.shields.io/badge/tests-hermetic-3FB950?logo=pytest&logoColor=white)](#tests)
+[![tests](https://github.com/gesh75/napalm-live-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/gesh75/napalm-live-lab/actions/workflows/ci.yml)
+[![docs](https://img.shields.io/badge/docs-GitHub%20Pages-58a6ff)](https://gesh75.github.io/napalm-live-lab/)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 ---
@@ -157,7 +162,7 @@ The dashboard computes this **live** — per node, per getter — from real coll
 | **FRRouting** | *none* | — | `docker exec vtysh` | None (no driver) | via `vtysh ... json` | **No NAPALM driver exists.** Collected via `vtysh`, mapped to NAPALM-shaped dicts; tagged `method: exec`, `napalm_supported: false`. Getters with no vtysh equivalent (LLDP, environment) are explicitly marked unsupported with a reason. |
 | **Juniper Junos** | `junos` | `napalm` (core) | NETCONF / SSH | Full | native | Supported by the driver map; not part of the shipped containerlab topology. |
 
-> **Honesty contract:** FRR has no NAPALM driver. The lab does not pretend otherwise — it surfaces the seam (`method: exec`, `napalm_supported: false`) instead of papering over it.
+> **Honesty contract:** FRR has no NAPALM driver. The lab does not pretend otherwise — it surfaces the seam (`method: exec`, `napalm_supported: false`) instead of papering over it. Junos is a core driver in `DRIVER_MAP` but **is not in the shipped 19-node topology**. A four-column CLOS with a cRPD leaf is the next fabric increment — this repo does not claim it is deployed.
 
 ---
 
@@ -278,6 +283,11 @@ curl -s "http://127.0.0.1:5959/api/test/runs/$RID/export?format=junit"
 
 > The checks are **honest**: e.g. `bgp-all-up` will report `8/9 satisfy eq True` and FAIL
 > if a real BGP session is down — it surfaces the truth, it doesn't rubber-stamp.
+>
+> **Fail-closed empty suites:** a suite whose selector matches zero hosts must ERROR, not
+> export `tests="0"` JUnit that CI treats as green. Canonical trigger: `evpn_bgp` ×
+> `fabric=dcn` (that suite only targets CLOS nodes). Tracked in
+> [PR #2](https://github.com/gesh75/napalm-live-lab/pull/2) (draft).
 
 ## Quickstart
 
@@ -399,9 +409,25 @@ pytest tests/ -q
 | `lab_runner/collect.py` | Real NAPALM runner (runs inside the `napalm-runner` sidecar). |
 | `core.py` | Legacy NetBox helpers (`NETBOX_URL`/`NETBOX_TOKEN` are env-only). |
 | `tests/` | Hermetic pytest suite (no live fabric). |
+| `docs/index.html` | GitHub Pages one-pager — honest 19-node / 3-vendor pitch. |
+| `.github/workflows/ci.yml` | Hermetic pytest on push/PR (Python 3.12). |
 | `LICENSE` | MIT. |
 
 ---
+
+
+## What's next (plan, not inventory)
+
+These are designed and documented. They are **not** in the shipped 19-node topology.
+
+| Item | Status | Why |
+|---|---|---|
+| GitHub Actions on the 76 hermetic tests | **Shipped** — this README's badge points at it | Tests existed; the old badge was a static shield. |
+| Fail-closed empty suites | Open draft [PR #2](https://github.com/gesh75/napalm-live-lab/pull/2) | `evpn_bgp` × `fabric=dcn` must ERROR, not vacuous PASS. |
+| Intent pack v2 (`running_config`, `lldp`, `arp`, `evpn`, `ntp`) | Plan | v1 is 8 intents, 24/24 on three vendors. The CLOS is an EVPN fabric; v1 never named EVPN. |
+| gNMI subscribe on SR Linux | Plan | JSON-RPC poll is how `napalm-srl` talks. SRL's native ops plane is gNMI. Complements the matrix; does not replace it. |
+| `napalm-frr` community stub | Plan | The exec fallback already produces NAPALM-shaped dicts. Keep `napalm_supported: false` until a live round-trip. |
+| cRPD leaf7 — four-column CLOS | Plan | Junos is mapped, not shipped. Official matrix: no `get_arp_table`. First-class is not every getter. |
 
 ## License
 
