@@ -10,18 +10,53 @@ def to_json(run: dict) -> dict:
     return run
 
 
+def _as_int(value, default: int = 0) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return default
+
+
+def _empty_run(totals: dict, results: list) -> bool:
+    """True when nothing was executed (legacy done/0/0 and fail-closed error)."""
+    return not results or _as_int(totals.get("total", 0)) == 0
+
+
+def _vacuous(run: dict, totals: dict, results: list) -> bool:
+    """True when the report must not look green.
+
+    Empty runs are vacuous. ``status=error`` is also a failed report, but it
+    is *not* treated as empty when real check results exist — collapsing those
+    to tests="1" would drop the actual cases from the JUnit counts.
+    """
+    return run.get("status") == "error" or _empty_run(totals, results)
+
+
 def to_junit(run: dict) -> str:
     """JUnit XML — directly consumable by Jenkins / GitHub Actions / GitLab CI."""
-    t = run.get("totals", {})
-    results = run.get("results", [])
+    t = run.get("totals") or {}
+    results = run.get("results") or []
+    empty = _empty_run(t, results)
+    # An empty run must emit at least one <error> testcase. Many CI
+    # parsers treat tests="0" failures="0" as success even when status=error.
+    tests = 1 if empty else t.get("total", 0)
+    failures = t.get("failed", 0)
+    errors = 1 if empty else t.get("errored", 0)
     lines = ['<?xml version="1.0" encoding="UTF-8"?>']
     lines.append(
         f'<testsuites name={quoteattr(run.get("suite_name",""))} '
-        f'tests="{t.get("total",0)}" failures="{t.get("failed",0)}" errors="{t.get("errored",0)}">')
+        f'tests="{tests}" failures="{failures}" errors="{errors}">')
     lines.append(
         f'  <testsuite name={quoteattr(run.get("suite_id",""))} '
-        f'tests="{t.get("total",0)}" failures="{t.get("failed",0)}" errors="{t.get("errored",0)}" '
+        f'tests="{tests}" failures="{failures}" errors="{errors}" '
         f'timestamp={quoteattr(run.get("started",""))}>')
+    if empty:
+        err = run.get("error") or "no checks executed"
+        lines.append(
+            f'    <testcase name="suite_executed" classname={quoteattr(run.get("suite_id",""))}>')
+        lines.append(
+            f'      <error message={quoteattr(err)}>{escape(str(err))}</error>')
+        lines.append('    </testcase>')
     for r in results:
         name = f'{r.get("name","")} [{r.get("hostname","")}]'
         cls = r.get("check_id", "")
@@ -42,10 +77,17 @@ def to_junit(run: dict) -> str:
 
 def to_html(run: dict) -> str:
     """Self-contained dark HTML report (GitHub-dark palette)."""
-    t = run.get("totals", {})
-    status_color = "#3fb950" if t.get("failed", 0) == 0 and t.get("errored", 0) == 0 else "#f85149"
+    t = run.get("totals") or {}
+    results = run.get("results") or []
+    passed = (not _vacuous(run, t, results)
+              and t.get("failed", 0) == 0
+              and t.get("errored", 0) == 0)
+    status_color = "#3fb950" if passed else "#f85149"
+    err = run.get("error") or ""
+    err_html = (f'<div class="sub" style="color:#f85149">{escape(str(err))}</div>'
+                if err else "")
     rows = []
-    for r in run.get("results", []):
+    for r in results:
         if r.get("errored"):
             badge, color = "ERROR", "#d29922"
         elif r.get("passed"):
@@ -70,5 +112,6 @@ th{{background:#1c2128;color:#8b949e;text-transform:uppercase;font-size:11px;let
 <div class="sub">fabric: {escape(str(run.get('fabric','')))} · started {escape(run.get('started',''))} · finished {escape(run.get('finished',''))}</div>
 <div class="summary">{'PASSED' if status_color=='#3fb950' else 'FAILED'} — {t.get('passed',0)}/{t.get('total',0)} passed
  · {t.get('failed',0)} failed · {t.get('errored',0)} errored</div>
+{err_html}
 <table><thead><tr><th>Status</th><th>Node</th><th>Check</th><th>Severity</th><th>Detail</th><th>ms</th></tr></thead>
 <tbody>{''.join(rows)}</tbody></table></body></html>"""

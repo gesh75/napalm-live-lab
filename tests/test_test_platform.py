@@ -111,6 +111,24 @@ def test_run_suite_aggregates(monkeypatch):
     assert run.totals["passed"] == run.totals["total"]  # all green with fake data
 
 
+def test_run_suite_fails_closed_when_no_hosts_match():
+    """evpn_bgp targets only clos nodes — a dcn filter must not report done/green."""
+    suite = S.load_all_suites()["evpn_bgp"]
+    run = RUN.run_suite(suite, fabric_filter="dcn")
+    assert run.status == "error"
+    assert run.totals["total"] == 0
+    assert run.results == []
+    assert "zero hosts" in (run.error or "")
+
+
+def test_run_suite_fails_closed_on_unknown_fabric():
+    suite = S.load_all_suites()["fabric_health"]
+    run = RUN.run_suite(suite, fabric_filter="nope")
+    assert run.status == "error"
+    assert run.totals["total"] == 0
+    assert "zero hosts" in (run.error or "")
+
+
 # ── results store (temp db) ─────────────────────────────────────────────────
 
 def test_results_roundtrip(monkeypatch, tmp_path):
@@ -141,3 +159,55 @@ def test_exporters():
     html = EX.to_html(run)
     assert "<table" in html and "FAILED" in html
     assert EX.to_json(run)["run_id"] == "run_x"
+
+
+def test_exporters_fail_closed_on_empty_run():
+    """JUnit/HTML must not look green when zero checks ran."""
+    run = {"run_id": "run_empty", "suite_id": "evpn_bgp", "suite_name": "CLOS-EVPN BGP",
+           "fabric": "dcn", "started": "t", "finished": "t", "status": "error",
+           "error": "no checks executed — fabric filter or target selector matched zero hosts",
+           "totals": {"passed": 0, "failed": 0, "errored": 0, "total": 0},
+           "results": []}
+    xml = EX.to_junit(run)
+    assert 'tests="1"' in xml
+    assert 'errors="1"' in xml
+    assert "<error" in xml
+    html = EX.to_html(run)
+    assert "FAILED" in html
+    assert "PASSED" not in html
+    assert "zero hosts" in html
+
+
+def test_exporters_fail_closed_on_legacy_done_empty_run():
+    """Persisted pre-fix runs were status=done with totals 0/0 — still not green."""
+    run = {"run_id": "run_legacy", "suite_id": "evpn_bgp", "suite_name": "CLOS-EVPN BGP",
+           "fabric": "dcn", "started": "t", "finished": "t", "status": "done",
+           "totals": {"passed": 0, "failed": 0, "errored": 0, "total": 0},
+           "results": []}
+    xml = EX.to_junit(run)
+    assert 'tests="1"' in xml
+    assert 'errors="1"' in xml
+    assert "<error" in xml
+    html = EX.to_html(run)
+    assert "FAILED" in html
+    assert "PASSED" not in html
+
+
+def test_exporters_error_with_results_keeps_real_junit_counts():
+    """status=error plus real checks must not collapse JUnit to tests=1."""
+    run = {"run_id": "run_partial", "suite_id": "s", "suite_name": "S", "fabric": "all",
+           "started": "t", "finished": "t", "status": "error",
+           "error": "collector crashed after 2 checks",
+           "totals": {"passed": 1, "failed": 1, "errored": 0, "total": 2},
+           "results": [
+               {"check_id": "a", "name": "A", "hostname": "h1", "passed": True,
+                "severity": "high", "message": "ok", "duration_ms": 5, "errored": False},
+               {"check_id": "b", "name": "B", "hostname": "h2", "passed": False,
+                "severity": "high", "message": "FAIL: 1 != 2", "duration_ms": 5, "errored": False}]}
+    xml = EX.to_junit(run)
+    assert 'tests="2"' in xml
+    assert 'failures="1"' in xml
+    assert "suite_executed" not in xml
+    html = EX.to_html(run)
+    assert "FAILED" in html
+    assert "collector crashed after 2 checks" in html

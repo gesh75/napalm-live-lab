@@ -110,6 +110,18 @@ def run_suite(suite, fabric_filter: str | None = None, max_workers: int = 8) -> 
                 results.append(CheckResult(check.id, check.name, h, ar.passed, check.severity,
                                            check.op, check.expected, ar.observed, ar.message, dur, False))
 
+    # Fail closed: a suite that resolved zero hosts (unknown fabric, mismatched
+    # fabric filter, or a selector that matches nothing) must not look like a
+    # clean run. JUnit consumers treat tests="0" failures="0" as green.
+    if not results:
+        run.results = []
+        run.totals = {"passed": 0, "failed": 0, "errored": 0, "total": 0}
+        run.status = "error"
+        run.error = ("no checks executed — fabric filter or target selector "
+                     "matched zero hosts")
+        run.finished = datetime.now().isoformat(timespec="seconds")
+        return run
+
     passed = sum(1 for r in results if r.passed and not r.errored)
     errored = sum(1 for r in results if r.errored)
     failed = len(results) - passed - errored
