@@ -335,6 +335,46 @@ class TestCollectNodeHermetic:
         assert ifaces["lo"]["is_up"] is False
         assert ifaces["lo"]["is_enabled"] is False
 
+    def test_frr_omitted_operational_status_follows_zebra_encoder(self, monkeypatch):
+        """FRR 10.1 omits operationalStatus when admin is down or link-detect
+        is off. Fail-closed on a missing key would mark loopbacks and
+        no-link-detect ifaces down even when they are operative."""
+        def fake(container, argv, timeout=30):
+            joined = " ".join(argv)
+            if "show interface" in joined:
+                ifs = {
+                    "eth0": {
+                        # Real FRR: admin up, link-detect on, carrier down.
+                        "administrativeStatus": "up", "operationalStatus": "down",
+                        "linkDetection": True,
+                    },
+                    "lo": {
+                        # Real FRR: admin up, no link-detect — no oper key.
+                        "administrativeStatus": "up", "linkDetection": False,
+                    },
+                    "eth9": {
+                        # Real FRR: admin down — no oper key.
+                        "administrativeStatus": "down",
+                    },
+                    "dummy0": {
+                        # No status keys at all — fail closed.
+                    },
+                }
+                return 0, json.dumps(ifs), ""
+            return 0, "{}", ""
+
+        monkeypatch.setattr(napalm_lab, "_docker_exec", fake)
+        r = napalm_lab._frr_collect(config.NODE_INDEX["de-fra-core-01"], ["get_interfaces"])
+        ifaces = r["data"]["get_interfaces"]
+        assert ifaces["eth0"]["is_up"] is False
+        assert ifaces["eth0"]["is_enabled"] is True
+        assert ifaces["lo"]["is_up"] is True
+        assert ifaces["lo"]["is_enabled"] is True
+        assert ifaces["eth9"]["is_up"] is False
+        assert ifaces["eth9"]["is_enabled"] is False
+        assert ifaces["dummy0"]["is_up"] is False
+        assert ifaces["dummy0"]["is_enabled"] is False
+
     def test_srl_falls_back_to_exec_when_runner_down(self, patch_docker):
         # srl JSON-RPC fails in the default fake; sr_cli exec fallback keeps the node reachable.
         r = napalm_lab.collect_node("spine1")  # nokia / srl

@@ -158,11 +158,22 @@ def _frr_collect(node: dict, getters: list[str]) -> dict:
             ifaces = {}
             if isinstance(j, dict):
                 for name, idata in j.items():
+                    # NAPALM: is_up is operational, is_enabled is admin.
+                    # Admin-up + oper-down is a down link — never treat admin as
+                    # is_up when operationalStatus is present.
+                    #
+                    # FRR 10.1 zebra omits operationalStatus unless admin is up
+                    # AND link-detect is on (zebra/interface.c). Missing is not
+                    # "unknown down": admin-down omits the key; admin-up with
+                    # link-detect off is operative (if_is_operative).
+                    admin_up = str(idata.get("administrativeStatus") or "").lower() in ("up", "true")
+                    if "operationalStatus" in idata:
+                        is_up = str(idata.get("operationalStatus") or "").lower() in ("up", "true")
+                    else:
+                        is_up = admin_up
                     ifaces[name] = {
-                        # NAPALM contract: is_up is operational, is_enabled is admin.
-                        # Admin-up + oper-down is a down link — never treat admin as is_up.
-                        "is_up": str(idata.get("operationalStatus") or "").lower() in ("up", "true"),
-                        "is_enabled": str(idata.get("administrativeStatus") or "").lower() in ("up", "true"),
+                        "is_up": is_up,
+                        "is_enabled": admin_up,
                         "description": idata.get("description", ""),
                         "speed": idata.get("speed", 0) or 0,
                         "mac_address": idata.get("hardwareAddress", ""),
