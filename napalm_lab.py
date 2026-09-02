@@ -159,9 +159,10 @@ def _frr_collect(node: dict, getters: list[str]) -> dict:
             if isinstance(j, dict):
                 for name, idata in j.items():
                     ifaces[name] = {
-                        "is_up": str(idata.get("administrativeStatus") or idata.get("operationalStatus") or "").lower() in ("up", "true")
-                                 or str(idata.get("operationalStatus") or "").lower() == "up",
-                        "is_enabled": str(idata.get("administrativeStatus") or "up").lower() == "up",
+                        # NAPALM contract: is_up is operational, is_enabled is admin.
+                        # Admin-up + oper-down is a down link — never treat admin as is_up.
+                        "is_up": str(idata.get("operationalStatus") or "").lower() in ("up", "true"),
+                        "is_enabled": str(idata.get("administrativeStatus") or "").lower() in ("up", "true"),
                         "description": idata.get("description", ""),
                         "speed": idata.get("speed", 0) or 0,
                         "mac_address": idata.get("hardwareAddress", ""),

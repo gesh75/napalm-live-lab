@@ -299,6 +299,42 @@ class TestCollectNodeHermetic:
         assert r["getters"]["get_lldp_neighbors"]["ok"] is False
         assert r["getters"]["get_environment"]["ok"] is False
 
+    def test_frr_is_up_follows_operational_status(self, monkeypatch):
+        """Admin-up + oper-down is a down link. 13/19 lab nodes are FRR; the
+        dashboard, snapshot-diff, and get_interfaces.*.is_up checks all read this flag."""
+        def fake(container, argv, timeout=30):
+            joined = " ".join(argv)
+            if "show interface" in joined:
+                ifs = {
+                    "eth0": {
+                        "administrativeStatus": "up", "operationalStatus": "down",
+                        "description": "peer-link", "speed": 1000,
+                        "hardwareAddress": "aa:bb:cc:dd:ee:ff", "mtu": 1500,
+                    },
+                    "eth1": {
+                        "administrativeStatus": "up", "operationalStatus": "up",
+                        "description": "ok", "speed": 1000,
+                        "hardwareAddress": "aa:bb:cc:dd:ee:00", "mtu": 1500,
+                    },
+                    "lo": {
+                        "administrativeStatus": "down", "operationalStatus": "down",
+                        "description": "admin-down", "speed": 0,
+                        "hardwareAddress": "", "mtu": 65536,
+                    },
+                }
+                return 0, json.dumps(ifs), ""
+            return 0, "{}", ""
+
+        monkeypatch.setattr(napalm_lab, "_docker_exec", fake)
+        r = napalm_lab._frr_collect(config.NODE_INDEX["de-fra-core-01"], ["get_interfaces"])
+        ifaces = r["data"]["get_interfaces"]
+        assert ifaces["eth0"]["is_up"] is False
+        assert ifaces["eth0"]["is_enabled"] is True
+        assert ifaces["eth1"]["is_up"] is True
+        assert ifaces["eth1"]["is_enabled"] is True
+        assert ifaces["lo"]["is_up"] is False
+        assert ifaces["lo"]["is_enabled"] is False
+
     def test_srl_falls_back_to_exec_when_runner_down(self, patch_docker):
         # srl JSON-RPC fails in the default fake; sr_cli exec fallback keeps the node reachable.
         r = napalm_lab.collect_node("spine1")  # nokia / srl
