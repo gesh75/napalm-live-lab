@@ -87,6 +87,12 @@ def test_topology_reuses_matrix_cache(client, monkeypatch):
     assert calls["n"] == 1, f"topology must reuse the matrix cache, collected {calls['n']} times"
 
 
+def test_test_run_rejects_unknown_fabric(client):
+    r = client.post("/api/test/run", json={"suite_id": "fabric_health", "fabric": "nope"})
+    assert r.status_code == 400
+    assert "unknown fabric" in r.get_json()["error"]
+
+
 def test_assert_rejects_napalm_mutator(client, monkeypatch):
     monkeypatch.setattr(
         "dashboard.collect_node",

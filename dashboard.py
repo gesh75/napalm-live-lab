@@ -370,6 +370,8 @@ def api_test_run():
     body = request.get_json(silent=True) or {}
     sid = (body.get("suite_id") or "").strip()
     fabric = (body.get("fabric") or "all").strip().lower()
+    if fabric != "all" and fabric not in FABRICS:
+        return jsonify({"error": f"unknown fabric: {fabric}"}), 400
     suite = load_all_suites().get(sid)
     if not suite:
         return jsonify({"error": f"unknown suite: {sid}"}), 404
